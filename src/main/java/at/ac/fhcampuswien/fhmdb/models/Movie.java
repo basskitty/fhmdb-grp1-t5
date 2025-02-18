@@ -1,16 +1,19 @@
 package at.ac.fhcampuswien.fhmdb.models;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Movie {
-    private String title;
-    private String description;
-    // TODO add more properties here
+    private final String title;
+    private final String description;
+    private final List<Genre> genres;
 
-    public Movie(String title, String description) {
+    public Movie(String title, String description, List<Genre> genres) {
         this.title = title;
         this.description = description;
+        this.genres= genres;
     }
 
     public String getTitle() {
@@ -23,7 +26,11 @@ public class Movie {
 
     public static List<Movie> initializeMovies(){
         List<Movie> movies = new ArrayList<>();
-        // TODO add some dummy data here
+        movies.add(new Movie("Better Man", "Robbie Williams, starred by an ape.", Arrays.asList(Genre.DRAMA, Genre.BIOGRAPHY)));
+        movies.add(new Movie("Harry Potter", "Avada Kedavra!", Arrays.asList(Genre.FANTASY, Genre.DRAMA)));
+        movies.add(new Movie("Barbie", "I'm a Barbie Girl, in a Barbie World..", Arrays.asList(Genre.ADVENTURE)));
+        movies.add(new Movie("The Matrix", "MISTER ANDERSON!", Arrays.asList(Genre.SCIENCE_FICTION, Genre.ACTION)));
+        movies.add(new Movie ("American Pie", "Warm as an apple pie.", Arrays.asList(Genre.COMEDY)));
 
         return movies;
     }
