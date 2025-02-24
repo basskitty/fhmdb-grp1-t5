@@ -12,6 +12,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.8.2</junit.version>
+        <testfx.version>4.0.16-alpha</testfx.version>
+        <javafx.version>17.0.2</javafx.version>
     </properties>
 
     <dependencies>
@@ -44,6 +46,27 @@
             <artifactId>jfoenix</artifactId>
             <version>9.0.10</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>controlsfx</artifactId>
+            <version>11.1.1</version>
+        </dependency>
+
+        <!-- TestFX Dependencies for JavaFX UI testing -->
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-core</artifactId>
+            <version>${testfx.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-junit5</artifactId>
+            <version>${testfx.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -76,6 +99,19 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M8</version>
+                <configuration>
+                    <argLine>
+                        --add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
+                        --add-exports=javafx.graphics/com.sun.javafx.tk=ALL-UNNAMED
+                        --add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED
+                        --add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED
+                    </argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>

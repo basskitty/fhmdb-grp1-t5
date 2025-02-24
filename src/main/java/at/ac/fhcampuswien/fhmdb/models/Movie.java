@@ -24,6 +24,8 @@ public class Movie {
         return description;
     }
 
+    public List<Genre> getGenres(){ return genres;}
+
     public static List<Movie> initializeMovies(){
         List<Movie> movies = new ArrayList<>();
         movies.add(new Movie("Better Man", "Robbie Williams, starred by an ape.", Arrays.asList(Genre.DRAMA, Genre.BIOGRAPHY)));
