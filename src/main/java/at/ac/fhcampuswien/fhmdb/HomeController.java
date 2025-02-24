@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.fhmdb;
 
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.models.Sorting;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
@@ -63,7 +64,7 @@ public class HomeController implements Initializable
 
         searchBtn.setOnAction(e -> filterMovies());
 
-        sortBtn.setText(SortButtonText.NAME_ASC.buttonText);
+        sortBtn.setText(Sorting.NAME_ASC.buttonText);
         sortBtn.setOnAction(e -> sortMovies());
     }
 
@@ -113,32 +114,19 @@ public class HomeController implements Initializable
     /**
      * Toggles the sorting order of movies by title (case‑insensitive).
      */
-    private void sortMovies()
+    void sortMovies()
     {
         Comparator<Movie> comparator = Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER);
-        if (sortBtn.getText().equals(SortButtonText.NAME_ASC.buttonText))
+        if (sortBtn.getText().equals(Sorting.NAME_ASC.buttonText))
         {
             FXCollections.sort(observableMovies, comparator);
-            sortBtn.setText(SortButtonText.NAME_DESC.buttonText);
+            sortBtn.setText(Sorting.NAME_DESC.buttonText);
         } else
         {
             FXCollections.sort(observableMovies, comparator.reversed());
-            sortBtn.setText(SortButtonText.NAME_ASC.buttonText);
+            sortBtn.setText(Sorting.NAME_ASC.buttonText);
         }
     }
 
-    private enum SortButtonText
-    {
-        NAME_ASC("Sort - Name (asc)"),
-        NAME_DESC("Sort - Name (desc)"),
-        CAT_ASC("Sort - Category (asc)"),
-        CAT_DESC("Sort - Category (desc)");
 
-        private final String buttonText;
-
-        SortButtonText(String buttonText)
-        {
-            this.buttonText = buttonText;
-        }
-    }
 }

@@ -1,9 +1,6 @@
 package at.ac.fhcampuswien.fhmdb.models;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Movie {
     private final String title;
@@ -36,4 +33,22 @@ public class Movie {
 
         return movies;
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Movie)) return false;
+        Movie movie = (Movie) o;
+        return Objects.equals(getTitle(), movie.getTitle()) &&
+                Objects.equals(getDescription(), movie.getDescription()) &&
+                Objects.equals(getGenres(), movie.getGenres());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTitle(), getDescription(), getGenres());
+    }
+
+
 }
