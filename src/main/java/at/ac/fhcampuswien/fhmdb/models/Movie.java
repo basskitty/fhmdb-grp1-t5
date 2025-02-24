@@ -24,6 +24,10 @@ public class Movie {
         return description;
     }
 
+    public List<Genre> getGenres() {
+        return genres;
+    }
+
     public static List<Movie> initializeMovies(){
         List<Movie> movies = new ArrayList<>();
         movies.add(new Movie("Better Man", "Robbie Williams, starred by an ape.", Arrays.asList(Genre.DRAMA, Genre.BIOGRAPHY)));
@@ -33,5 +37,15 @@ public class Movie {
         movies.add(new Movie ("American Pie", "Warm as an apple pie.", Arrays.asList(Genre.COMEDY)));
 
         return movies;
+    }
+
+    @Override
+    public String toString() {
+        return getTitle();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Movie && title.equals(((Movie) o).title);
     }
 }

@@ -1,17 +1,20 @@
 package at.ac.fhcampuswien.fhmdb;
 
 import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.models.Sorting;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -33,7 +36,7 @@ public class HomeController implements Initializable {
 
     public List<Movie> allMovies = Movie.initializeMovies();
 
-    private final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();   // automatically updates corresponding UI elements when underlying data changes
+    final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();   // automatically updates corresponding UI elements when underlying data changes
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -53,13 +56,27 @@ public class HomeController implements Initializable {
         sortBtn.setOnAction(actionEvent -> {
             if(sortBtn.getText().equals("Sort (asc)")) {
                 // TODO sort observableMovies ascending
+                sortMovies(Sorting.ASCENDING);
                 sortBtn.setText("Sort (desc)");
             } else {
                 // TODO sort observableMovies descending
                 sortBtn.setText("Sort (asc)");
+                sortMovies(Sorting.DESCENDING);
             }
         });
+    }
 
+    public void initializeData() {
+        observableMovies.clear();
+        observableMovies.addAll(allMovies);
+    }
 
+    public void sortMovies(Sorting order) {
+        if (order == Sorting.ASCENDING) {
+            observableMovies.sort(Comparator.comparing(Movie::getTitle));
+        }
+        if (order == Sorting.DESCENDING) {
+            observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed());
+        }
     }
 }
