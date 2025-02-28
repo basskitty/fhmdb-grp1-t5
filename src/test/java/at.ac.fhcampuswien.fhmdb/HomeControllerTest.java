@@ -3,9 +3,11 @@ package at.ac.fhcampuswien.fhmdb;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.Sorting;
+import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,7 +96,6 @@ public class HomeControllerTest extends ApplicationTest {
     }
 
 
-
     @Test
     public void sort_movies_ascending() {
         interact(() -> {
@@ -129,4 +130,20 @@ public class HomeControllerTest extends ApplicationTest {
 
         assertEquals(expected, testController.observableMovies);
     }
+
+    @Test
+    public void movieCell_showsGenresCorrectly() {
+        interact(() -> {
+            Movie testMovie = new Movie("Test Movie", "Some description",
+                    Arrays.asList(Genre.ACTION, Genre.COMEDY));
+            testController.observableMovies.setAll(testMovie);
+        });
+
+        MovieCell firstCell = (MovieCell) testController.movieListView.lookup(".list-cell");
+
+        Label genresLabel = (Label) firstCell.lookup(".text-grey");
+        assertNotNull(genresLabel, "Genres-Label sollte existieren");
+        assertEquals("Genres: Action, Comedy", genresLabel.getText());
+    }
+
 }

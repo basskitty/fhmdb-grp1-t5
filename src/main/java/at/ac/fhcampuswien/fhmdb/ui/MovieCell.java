@@ -11,12 +11,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
+import java.util.stream.Collectors;
+
 public class MovieCell extends ListCell<Movie>
 {
     private final Label title = new Label();
     private final Label detail = new Label();
+    private final Label genresLabel = new Label();
 
-    private final VBox layout = new VBox(title, detail);
+    private final VBox layout = new VBox(title, detail, genresLabel);
 
     @Override
     protected void updateItem(Movie movie, boolean empty) {
@@ -34,6 +37,12 @@ public class MovieCell extends ListCell<Movie>
             // Set the title and detail text.
             title.setText(movie.getTitle());
             detail.setText(movie.getDescription() != null ? movie.getDescription() : "No description available");
+
+            String genresString = movie.getGenres().stream()
+                    .map(genre -> genre.toString())
+                    .collect(Collectors.joining(", "));
+            genresLabel.setText("Genres: " + genresString);
+            genresLabel.getStyleClass().add("text-grey");
 
             // Apply style classes if not already added
             if (!title.getStyleClass().contains("text-yellow")) {
