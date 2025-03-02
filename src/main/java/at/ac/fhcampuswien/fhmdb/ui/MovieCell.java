@@ -38,11 +38,13 @@ public class MovieCell extends ListCell<Movie>
             title.setText(movie.getTitle());
             detail.setText(movie.getDescription() != null ? movie.getDescription() : "No description available");
 
-            String genresString = movie.getGenres().stream()
-                    .map(genre -> genre.toString())
+            // Set the genres.
+            String genresString = movie.getGenres().isEmpty()
+                    ? "No genres available"
+                    : movie.getGenres().stream()
+                    .map(genre -> genre.toString().toUpperCase())
                     .collect(Collectors.joining(", "));
-            genresLabel.setText("Genres: " + genresString);
-            genresLabel.getStyleClass().add("text-grey");
+            genresLabel.setText(genresString);
 
             // Apply style classes if not already added
             if (!title.getStyleClass().contains("text-yellow")) {
@@ -50,6 +52,9 @@ public class MovieCell extends ListCell<Movie>
             }
             if (!detail.getStyleClass().contains("text-white")) {
                 detail.getStyleClass().add("text-white");
+            }
+            if (!genresLabel.getStyleClass().contains("text-grey-italic")) {
+                genresLabel.getStyleClass().add("text-grey-italic");
             }
 
             // Set background color for layout

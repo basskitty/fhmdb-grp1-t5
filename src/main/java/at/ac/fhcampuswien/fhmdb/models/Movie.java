@@ -10,7 +10,13 @@ public class Movie {
     public Movie(String title, String description, List<Genre> genres) {
         this.title = title;
         this.description = description;
-        this.genres= genres;
+        this.genres = genres;
+    }
+
+    public Movie(String title, String description) {
+        this.title = title;
+        this.description = description;
+        this.genres = new ArrayList<>();
     }
 
     public String getTitle() {
@@ -30,6 +36,7 @@ public class Movie {
         movies.add(new Movie("Barbie", "I'm a Barbie Girl, in a Barbie World..", Arrays.asList(Genre.ADVENTURE)));
         movies.add(new Movie("The Matrix", "MISTER ANDERSON!", Arrays.asList(Genre.SCIENCE_FICTION, Genre.ACTION)));
         movies.add(new Movie ("American Pie", "Warm as an apple pie.", Arrays.asList(Genre.COMEDY)));
+        movies.add(new Movie ("The Lobster", "Yorgos Lanthimos becoming a shrimp."));
 
         return movies;
     }

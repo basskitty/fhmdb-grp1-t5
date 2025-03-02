@@ -11,7 +11,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 import java.net.URL;
 import java.util.Comparator;
@@ -37,8 +41,6 @@ public class HomeController implements Initializable
     final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
     public List<Movie> allMovies = Movie.initializeMovies();
-
-
 
 
 
@@ -107,6 +109,9 @@ public class HomeController implements Initializable
         }
         // Update the observable list and refresh the ListView.
         observableMovies.setAll(filtered);
+
+        movieListView.setPlaceholder(filtered.isEmpty() ? createPlaceholder() : null);
+
         movieListView.refresh();
     }
 
@@ -129,4 +134,15 @@ public class HomeController implements Initializable
     }
 
 
+    // Create placeholder if there are no movies matching with the chosen filters
+    private VBox createPlaceholder() {
+        Label placeholderLabel = new Label("No movies matching with the chosen filters.");
+        placeholderLabel.getStyleClass().add("placeholder-label");
+
+        VBox placeholderContainer = new VBox(placeholderLabel);
+        placeholderContainer.setAlignment(Pos.TOP_LEFT);
+        placeholderContainer.setPadding(new Insets(10, 0, 0, 10));
+
+        return placeholderContainer;
+    }
 }

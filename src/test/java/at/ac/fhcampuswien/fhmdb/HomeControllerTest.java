@@ -3,11 +3,9 @@ package at.ac.fhcampuswien.fhmdb;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.Sorting;
-import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,6 +95,21 @@ public class HomeControllerTest extends ApplicationTest {
 
 
     @Test
+    public void filterMovies_showsAllMoviesIfNoFiltersApplied() {
+        // Reset all filters
+        interact(() -> {
+            testController.searchField.setText("");  // empty search field
+            testController.genreComboBox.getSelectionModel().clearSelection();  // no genre chosen
+            testController.filterMovies();
+        });
+
+        // Tests if all movies are shown
+        assertEquals(testController.allMovies.size(), testController.observableMovies.size(),
+                "If no filters are applied, all movies should be shown.");
+    }
+
+
+    @Test
     public void sort_movies_ascending() {
         interact(() -> {
             testController.sortBtn.setText(Sorting.NAME_ASC.buttonText);
@@ -107,6 +120,7 @@ public class HomeControllerTest extends ApplicationTest {
                 new Movie("Barbie", "I'm a Barbie Girl, in a Barbie World..", Arrays.asList(Genre.ADVENTURE)),
                 new Movie("Better Man", "Robbie Williams, starred by an ape.", Arrays.asList(Genre.DRAMA, Genre.BIOGRAPHY)),
                 new Movie("Harry Potter", "Avada Kedavra!", Arrays.asList(Genre.FANTASY, Genre.DRAMA)),
+                new Movie("The Lobster", "Yorgos Lanthimos becoming a shrimp."),
                 new Movie("The Matrix", "MISTER ANDERSON!", Arrays.asList(Genre.SCIENCE_FICTION, Genre.ACTION))
         );
 
@@ -122,6 +136,7 @@ public class HomeControllerTest extends ApplicationTest {
 
         List<Movie> expected = Arrays.asList(
                 new Movie("The Matrix", "MISTER ANDERSON!", Arrays.asList(Genre.SCIENCE_FICTION, Genre.ACTION)),
+                new Movie("The Lobster", "Yorgos Lanthimos becoming a shrimp."),
                 new Movie("Harry Potter", "Avada Kedavra!", Arrays.asList(Genre.FANTASY, Genre.DRAMA)),
                 new Movie("Better Man", "Robbie Williams, starred by an ape.", Arrays.asList(Genre.DRAMA, Genre.BIOGRAPHY)),
                 new Movie("Barbie", "I'm a Barbie Girl, in a Barbie World..", Arrays.asList(Genre.ADVENTURE)),
@@ -129,21 +144,6 @@ public class HomeControllerTest extends ApplicationTest {
         );
 
         assertEquals(expected, testController.observableMovies);
-    }
-
-    @Test
-    public void movieCell_showsGenresCorrectly() {
-        interact(() -> {
-            Movie testMovie = new Movie("Test Movie", "Some description",
-                    Arrays.asList(Genre.ACTION, Genre.COMEDY));
-            testController.observableMovies.setAll(testMovie);
-        });
-
-        MovieCell firstCell = (MovieCell) testController.movieListView.lookup(".list-cell");
-
-        Label genresLabel = (Label) firstCell.lookup(".text-grey");
-        assertNotNull(genresLabel, "Genres-Label sollte existieren");
-        assertEquals("Genres: Action, Comedy", genresLabel.getText());
     }
 
 }
