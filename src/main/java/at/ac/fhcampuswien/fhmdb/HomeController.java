@@ -40,9 +40,8 @@ public class HomeController implements Initializable
     // This observable list backs the ListView.
     final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
-    public List<Movie> allMovies = Movie.initializeMovies();
-
-
+    //public List<Movie> allMovies = Movie.initializeMovies();
+    public List<Movie> allMovies = MovieAPI.getAllMovies();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle)
