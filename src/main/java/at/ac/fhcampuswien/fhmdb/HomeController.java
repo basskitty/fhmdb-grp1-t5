@@ -58,8 +58,7 @@ public class HomeController implements Initializable
 
         movieListView.setItems(observableMovies);
         movieListView.setCellFactory(listView -> new MovieCell());
-
-
+        
         // LOAD GENRES
         // Populate the ComboBox with all Genre enum values.
         genreComboBox.getItems().addAll(Genre.values());
