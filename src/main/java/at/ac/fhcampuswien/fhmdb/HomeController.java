@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb;
 
+import at.ac.fhcampuswien.fhmdb.models.Decade;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.Sorting;
@@ -36,11 +37,16 @@ public class HomeController implements Initializable
     public JFXComboBox<Genre> genreComboBox; // ComboBox holding Genre objects.
     @FXML
     public JFXButton sortBtn;
+    @FXML
+    public JFXComboBox<Decade> releaseYearComboBox;
+    @FXML
+    public JFXComboBox<Double> ratingComboBox;
+
 
     // This observable list backs the ListView.
     final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
-    //public List<Movie> allMovies = Movie.initializeMovies();
+    // Public List<Movie> allMovies = Movie.initializeMovies();
     public List<Movie> allMovies = MovieAPI.getAllMovies();
 
     @Override
@@ -57,7 +63,16 @@ public class HomeController implements Initializable
         // LOAD GENRES
         // Populate the ComboBox with all Genre enum values.
         genreComboBox.getItems().addAll(Genre.values());
-        genreComboBox.setPromptText("Select Genre");
+        genreComboBox.setPromptText("Select genre");
+
+        releaseYearComboBox.getItems().addAll(Decade.values());
+        releaseYearComboBox.setPromptText("Select release decade");
+
+        // Fill rating combo box (from 1.0 to 10.0)
+        ratingComboBox.getItems().addAll(
+                1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0
+        );
+        ratingComboBox.setPromptText("Select minimum rating");
 
 
         // SET EVENT LISTENERS
@@ -77,6 +92,10 @@ public class HomeController implements Initializable
         String searchText = (searchField.getText() != null)
                 ? searchField.getText().trim().toLowerCase()
                 : "";
+
+        // Retrieve selected decades, rating and genres.
+        Decade selectedReleaseDecade = releaseYearComboBox.getValue();
+        Double minRating = ratingComboBox.getValue();
         Genre selectedGenre = genreComboBox.getValue();
 
         List<Movie> filtered = allMovies;
@@ -90,11 +109,11 @@ public class HomeController implements Initializable
             filtered = !titleMatches.isEmpty()
                     ? titleMatches
                     : allMovies.stream()
-                    .filter(movie -> movie.getDescription().toLowerCase().contains(searchText))
-                    .collect(Collectors.toList());
+                      .filter(movie -> movie.getDescription().toLowerCase().contains(searchText))
+                      .collect(Collectors.toList());
         }
 
-        // If a genre is selected and it is not the ALL_GENRE default, filter further.
+        // If a genre is selected, and it is not the ALL_GENRE default, filter further.
         if (selectedGenre != null && !selectedGenre.equals(Genre.ALL_GENRE))
         {
             filtered = filtered.stream()
@@ -102,15 +121,30 @@ public class HomeController implements Initializable
                     .collect(Collectors.toList());
         }
 
+        // Filter by release decade
+        if (selectedReleaseDecade != null) {
+            int start = selectedReleaseDecade.getStartYear();
+            int end = selectedReleaseDecade.getEndYear();
+            filtered = filtered.stream()
+                    .filter(movie -> movie.getReleaseYear() >= start && movie.getReleaseYear() <= end)
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by rating
+        if(minRating != null) {
+            filtered = filtered.stream()
+                    .filter(movie -> movie.getRating() >= minRating)
+                    .collect(Collectors.toList());
+        }
+
         if (selectedGenre != null && selectedGenre.equals(Genre.ALL_GENRE))
         {
             javafx.application.Platform.runLater(() -> genreComboBox.getSelectionModel().clearSelection());
         }
+
         // Update the observable list and refresh the ListView.
         observableMovies.setAll(filtered);
-
         movieListView.setPlaceholder(filtered.isEmpty() ? createPlaceholder() : null);
-
         movieListView.refresh();
     }
 
