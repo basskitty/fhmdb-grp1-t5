@@ -21,11 +21,7 @@ import javafx.scene.layout.VBox;
 import org.controlsfx.control.CheckComboBox;
 
 import java.net.URL;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class HomeController implements Initializable
 {
@@ -43,7 +39,7 @@ public class HomeController implements Initializable
     @FXML
     public CheckComboBox<Decade> releaseYearComboBox;
     @FXML
-    public JFXComboBox<Double> ratingComboBox;
+    public JFXComboBox<Integer> ratingComboBox;
 
 
     // This observable list backs the ListView.
@@ -83,7 +79,7 @@ public class HomeController implements Initializable
 
         // Fill rating combo box (from 1.0 to 10.0)
         ratingComboBox.getItems().addAll(
-                1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10
         );
         ratingComboBox.setPromptText("Select minimum rating");
 
@@ -101,54 +97,41 @@ public class HomeController implements Initializable
 
     void filterMovies()
     {
-        // Retrieve and normalize search text.
-        String searchText = (searchField.getText() != null)
+        // Retrieve User Input
+        String inputSearch = (searchField.getText() != null)
                 ? searchField.getText().trim().toLowerCase()
                 : "";
 
-        // Retrieve selected decades, rating and genres.
-        List<Decade> selectedDecades = releaseYearComboBox.getCheckModel().getCheckedItems();
-        Double minRating = ratingComboBox.getValue();
-        Genre selectedGenre = genreComboBox.getValue();
+        List<Decade> inputDecades = releaseYearComboBox.getCheckModel().getCheckedItems();
+        Integer inputRating = ratingComboBox.getValue();
+        Genre inputGenre = genreComboBox.getValue();
 
-        List<Movie> filtered = allMovies;
 
-        // If search text is provided, filter by title first, then description if no title matches.
-        if (!searchText.isEmpty())
+
+        String searchText = null;
+        List<Decade> selectedDecades = null;
+        String minRating = null;
+        Genre selectedGenre = null;
+
+
+        if(!inputSearch.isEmpty())
         {
-            List<Movie> titleMatches = allMovies.stream()
-                    .filter(movie -> movie.getTitle().toLowerCase().contains(searchText))
-                    .collect(Collectors.toList());
-            filtered = !titleMatches.isEmpty()
-                    ? titleMatches
-                    : allMovies.stream()
-                      .filter(movie -> movie.getDescription().toLowerCase().contains(searchText))
-                      .collect(Collectors.toList());
+            searchText = inputSearch;
         }
 
-        // If a genre is selected, and it is not the ALL_GENRE default, filter further.
-        if (selectedGenre != null && !selectedGenre.equals(Genre.ALL_GENRE))
+        if(inputGenre != null && !selectedGenre.equals(Genre.ALL_GENRE))
         {
-            filtered = filtered.stream()
-                    .filter(movie -> movie.getGenres().contains(selectedGenre))
-                    .collect(Collectors.toList());
+            selectedGenre = inputGenre;
         }
 
-        // Filter by multiple selected release decades
-        if (selectedDecades != null && !selectedDecades.isEmpty()) {
-            filtered = filtered.stream()
-                    .filter(movie -> selectedDecades.stream()
-                            .anyMatch(decade -> movie.getReleaseYear() >= decade.getStartYear() &&
-                                    movie.getReleaseYear() <= decade.getEndYear()))
-                    .collect(Collectors.toList());
+        if(inputDecades != null && !inputDecades.isEmpty())
+        {
+            selectedDecades = inputDecades;
         }
 
-
-        // Filter by rating
-        if(minRating != null) {
-            filtered = filtered.stream()
-                    .filter(movie -> movie.getRating() >= minRating)
-                    .collect(Collectors.toList());
+        if(inputRating != null && inputRating >= 1 && inputRating <= 10)
+        {
+            minRating = inputRating.toString();
         }
 
         if (selectedGenre != null && selectedGenre.equals(Genre.ALL_GENRE))
@@ -156,10 +139,45 @@ public class HomeController implements Initializable
             javafx.application.Platform.runLater(() -> genreComboBox.getSelectionModel().clearSelection());
         }
 
+        List<Movie> searchedMovies = getMoviesfromAPI(searchText, selectedGenre, selectedDecades, minRating);
+
         // Update the observable list and refresh the ListView.
-        observableMovies.setAll(filtered);
-        movieListView.setPlaceholder(filtered.isEmpty() ? createPlaceholder() : null);
+        observableMovies.setAll(searchedMovies);
+        movieListView.setPlaceholder(searchedMovies.isEmpty() ? createPlaceholder() : null);
         movieListView.refresh();
+    }
+
+
+    List<Movie> getMoviesfromAPI(String query, Genre genre, List<Decade> selectedDecades, String rating)
+    {
+        List<String> selectedYears = getSelectedYears(selectedDecades);
+        List<Movie> filteredMovies = new ArrayList<>();
+
+        for(String year : selectedYears)
+        {
+            filteredMovies.addAll(MovieAPI.getfilteredMovies(query,genre,year, rating));
+        }
+
+        return filteredMovies;
+    }
+
+
+    private List<String> getSelectedYears(List<Decade> selectedDecades) {
+        List<String> years = new ArrayList<>();
+
+        if (selectedDecades == null || selectedDecades.isEmpty()) {
+            return years;
+        }
+
+        for (Decade decade : selectedDecades)
+        {
+            for (int year = decade.getStartYear(); year <= decade.getEndYear(); year++)
+            {
+                years.add(String.valueOf(year));
+            }
+        }
+
+        return years;
     }
 
 

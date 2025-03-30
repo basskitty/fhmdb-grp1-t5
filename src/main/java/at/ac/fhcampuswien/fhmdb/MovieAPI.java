@@ -45,8 +45,10 @@ public class MovieAPI {
         return url.toString();
     }
 
-    private static String buildURL(String query, Genre genre, String year, String rating) {
+    private static String buildURL(String query, Genre genre, String year, String rating)
+    {
         StringBuilder url = new StringBuilder(API_BASE_PATH);
+
         // Check if any parameters are added and build URL
         if ((query != null && !query.isEmpty()) || genre != null || year != null || rating != null) {
             url.append("?");
@@ -64,33 +66,48 @@ public class MovieAPI {
                 url.append("ratingFrom=").append(rating).append(URL_DELIMITER);
             }
         }
+
         System.out.println("Query URL: " + url);
         return url.toString();
     }
 
     // Method to get all movies without filtering
     public static List<Movie> getAllMovies() {
-        return getAllMovies(null, null, null, null);
+        return getfilteredMovies(null, null, null, null);
     }
 
     // Method to get filtered movies
-    public static List<Movie> getAllMovies(String query, Genre genre, String year, String rating) {
+    public static List<Movie> getfilteredMovies(String query, Genre genre, String year, String rating)
+    {
         Request request = new Request.Builder()
                 .header("User-Agent", "http.agent")
                 .url(buildURL(query, genre, year, rating))
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
+        List<Movie> filteredMovies = parseMovies(request);
+
+        return filteredMovies;
+    }
+
+
+    private static List<Movie> parseMovies(Request request)
+    {
+        try (Response response = client.newCall(request).execute())
+        {
             String jsonResponse = Objects.requireNonNull(response.body()).string();
             Gson gson = new Gson();
             Movie[] movies = gson.fromJson(jsonResponse, Movie[].class);
-            System.out.println("Returned movies: " + Arrays.toString(movies));
 
+            System.out.println("Returned movies: " + Arrays.toString(movies));
             return Arrays.asList(movies);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
         }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 
     // Method to get movie by ID
     public static Movie getMovieByID(UUID id) {
@@ -110,4 +127,4 @@ public class MovieAPI {
             throw new RuntimeException(e);
         }
     }
-    }
+}
