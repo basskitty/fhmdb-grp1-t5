@@ -85,8 +85,6 @@ public class HomeController implements Initializable
 
 
         // SET EVENT LISTENERS
-        genreComboBox.setOnAction(e -> filterMovies());
-
         searchBtn.setOnAction(e -> filterMovies());
 
         sortBtn.setText(Sorting.NAME_ASC.buttonText);
@@ -119,7 +117,7 @@ public class HomeController implements Initializable
             searchText = inputSearch;
         }
 
-        if(inputGenre != null && !selectedGenre.equals(Genre.ALL_GENRE))
+        if(inputGenre != null && !inputGenre.equals(Genre.ALL_GENRE))
         {
             selectedGenre = inputGenre;
         }
@@ -134,10 +132,12 @@ public class HomeController implements Initializable
             minRating = inputRating.toString();
         }
 
+        /*
         if (selectedGenre != null && selectedGenre.equals(Genre.ALL_GENRE))
         {
             javafx.application.Platform.runLater(() -> genreComboBox.getSelectionModel().clearSelection());
         }
+        */
 
         List<Movie> searchedMovies = getMoviesfromAPI(searchText, selectedGenre, selectedDecades, minRating);
 
@@ -151,11 +151,17 @@ public class HomeController implements Initializable
     List<Movie> getMoviesfromAPI(String query, Genre genre, List<Decade> selectedDecades, String rating)
     {
         List<String> selectedYears = getSelectedYears(selectedDecades);
+
+        // If no decades selected → only 1 API call with null for releaseYear
+        if (selectedYears.isEmpty()) {
+            return MovieAPI.getfilteredMovies(query, genre, null, rating);
+        }
+
         List<Movie> filteredMovies = new ArrayList<>();
 
-        for(String year : selectedYears)
-        {
-            filteredMovies.addAll(MovieAPI.getfilteredMovies(query,genre,year, rating));
+        for (String year : selectedYears) {
+            List<Movie> response = MovieAPI.getfilteredMovies(query, genre, year, rating);
+            filteredMovies.addAll(response);
         }
 
         return filteredMovies;

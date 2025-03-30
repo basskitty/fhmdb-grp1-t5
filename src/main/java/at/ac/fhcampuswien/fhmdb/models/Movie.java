@@ -39,6 +39,19 @@ public class Movie {
         this.rating = rating;
     }
 
+    // Constructor for Testcases
+    public Movie(String title, String description, List<Genre> genres, int releaseYear, List<String> directors) {
+        this.title = title;
+        this.description = description;
+        this.genres = genres;
+        this.releaseYear = releaseYear;
+        this.directors.addAll(directors);
+        this.id = null;
+        this.imgUrl = null;
+        this.lengthInMinutes = 0;
+        this.rating = 0;
+    }
+
     public String getTitle() {
         return title;
     }
