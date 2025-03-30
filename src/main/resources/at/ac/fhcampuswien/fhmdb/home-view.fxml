@@ -6,6 +6,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import org.controlsfx.control.CheckComboBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -33,7 +34,7 @@
          <JFXButton fx:id="sortBtn" styleClass="background-yellow" stylesheets="@styles.css" />
          <TextField fx:id="searchField" prefHeight="25.0" prefWidth="170.0" promptText="Search FHMDb" />
          <JFXComboBox fx:id="genreComboBox" focusColor="#f5c518" styleClass="filter-combo-box" stylesheets="@styles.css" />
-         <JFXComboBox fx:id="releaseYearComboBox" promptText="Release Decade" focusColor="#f5c518" styleClass="filter-combo-box" stylesheets="@styles.css"/>
+         <CheckComboBox fx:id="releaseYearComboBox" styleClass="check-combo-box" stylesheets="@styles.css"/>
          <JFXComboBox fx:id="ratingComboBox" promptText="Min Rating" focusColor="#f5c518" styleClass="filter-combo-box" stylesheets="@styles.css"/>
          <JFXButton fx:id="searchBtn" styleClass="background-yellow" stylesheets="@styles.css" text="Filter" />
       </children>

@@ -54,3 +54,16 @@
     -fx-background-color: white;
     -fx-text-fill: #ffffff;
 }
+
+.check-combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #f5c518;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 4 6 4 6;
+    -fx-font-size: 13px;
+}
+
+.check-combo-box .label {
+    -fx-text-fill: #808080; /* Grau für Placeholder */
+}

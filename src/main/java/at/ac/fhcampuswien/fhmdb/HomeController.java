@@ -9,6 +9,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -17,10 +18,12 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import org.controlsfx.control.CheckComboBox;
 
 import java.net.URL;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -38,7 +41,7 @@ public class HomeController implements Initializable
     @FXML
     public JFXButton sortBtn;
     @FXML
-    public JFXComboBox<Decade> releaseYearComboBox;
+    public CheckComboBox<Decade> releaseYearComboBox;
     @FXML
     public JFXComboBox<Double> ratingComboBox;
 
@@ -58,14 +61,25 @@ public class HomeController implements Initializable
 
         movieListView.setItems(observableMovies);
         movieListView.setCellFactory(listView -> new MovieCell());
-        
+
         // LOAD GENRES
         // Populate the ComboBox with all Genre enum values.
         genreComboBox.getItems().addAll(Genre.values());
-        genreComboBox.setPromptText("Select genre");
+        genreComboBox.setPromptText("Filter by genre");
 
         releaseYearComboBox.getItems().addAll(Decade.values());
-        releaseYearComboBox.setPromptText("Select release decade");
+
+        // PromptText Simulation für CheckComboBox
+        if (releaseYearComboBox.getCheckModel().getCheckedItems().isEmpty()) {
+            releaseYearComboBox.setTitle("Filter by decade");
+        }
+        releaseYearComboBox.getCheckModel().getCheckedItems().addListener((ListChangeListener<Decade>) change -> {
+            if (releaseYearComboBox.getCheckModel().getCheckedItems().isEmpty()) {
+                releaseYearComboBox.setTitle("Filter by decade");
+            } else {
+                releaseYearComboBox.setTitle(null); // leer machen, sobald Auswahl getroffen
+            }
+        });
 
         // Fill rating combo box (from 1.0 to 10.0)
         ratingComboBox.getItems().addAll(
@@ -93,7 +107,7 @@ public class HomeController implements Initializable
                 : "";
 
         // Retrieve selected decades, rating and genres.
-        Decade selectedReleaseDecade = releaseYearComboBox.getValue();
+        List<Decade> selectedDecades = releaseYearComboBox.getCheckModel().getCheckedItems();
         Double minRating = ratingComboBox.getValue();
         Genre selectedGenre = genreComboBox.getValue();
 
@@ -120,14 +134,15 @@ public class HomeController implements Initializable
                     .collect(Collectors.toList());
         }
 
-        // Filter by release decade
-        if (selectedReleaseDecade != null) {
-            int start = selectedReleaseDecade.getStartYear();
-            int end = selectedReleaseDecade.getEndYear();
+        // Filter by multiple selected release decades
+        if (selectedDecades != null && !selectedDecades.isEmpty()) {
             filtered = filtered.stream()
-                    .filter(movie -> movie.getReleaseYear() >= start && movie.getReleaseYear() <= end)
+                    .filter(movie -> selectedDecades.stream()
+                            .anyMatch(decade -> movie.getReleaseYear() >= decade.getStartYear() &&
+                                    movie.getReleaseYear() <= decade.getEndYear()))
                     .collect(Collectors.toList());
         }
+
 
         // Filter by rating
         if(minRating != null) {
@@ -164,7 +179,6 @@ public class HomeController implements Initializable
             sortBtn.setText(Sorting.NAME_ASC.buttonText);
         }
     }
-
 
     // Create placeholder if there are no movies matching with the chosen filters
     private VBox createPlaceholder() {
