@@ -40,12 +40,13 @@ public class Movie {
     }
 
     // Constructor for Testcases
-    public Movie(String title, String description, List<Genre> genres, int releaseYear, List<String> directors) {
+    public Movie(String title, String description, List<Genre> genres, int releaseYear, List<String> directors, List<String> mainCast) {
         this.title = title;
         this.description = description;
         this.genres = genres;
         this.releaseYear = releaseYear;
         this.directors.addAll(directors);
+        this.mainCast.addAll(mainCast);
         this.id = null;
         this.imgUrl = null;
         this.lengthInMinutes = 0;
