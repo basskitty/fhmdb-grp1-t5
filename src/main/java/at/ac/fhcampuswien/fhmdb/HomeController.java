@@ -101,7 +101,8 @@ public class HomeController implements Initializable
         // Testing results from MovieUtils methods
         System.out.println("Most popular actor: " + MovieUtils.getMostPopularActor(searchedMovies));
         System.out.println("Longest movie title: " + MovieUtils.getLongestMovieTitle(searchedMovies));
-        System.out.println("Movies directed by Peter Jackson: " + MovieUtils.countMoviesFrom(searchedMovies, "Peter Jackson"));
+        System.out.println("Movies between 1980 and 1998: " + MovieUtils.getMoviesBetweenYears(searchedMovies, 1980, 1998));
+        System.out.println("Movies directed by Hayao Miyazaki: " + MovieUtils.countMoviesFrom(searchedMovies, "Hayao Miyazaki"));
 
         // Update the observable list and refresh the ListView.
         observableMovies.setAll(searchedMovies);
