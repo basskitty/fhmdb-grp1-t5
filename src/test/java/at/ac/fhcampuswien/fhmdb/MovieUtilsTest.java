@@ -51,7 +51,7 @@ public class MovieUtilsTest {
     }
 
     @Test
-    void most_popular_actor_should_return_correct_actor() {
+    void getMostPopularActor_returns_correct_actor() {
         // Given
         List<Movie> movies = List.of(movie1, movie2, movie3);
 
@@ -63,13 +63,13 @@ public class MovieUtilsTest {
     }
 
     @Test
-    void most_popular_actor_should_return_default_when_list_is_empty() {
+    void getMostPopularActor_returns_default_when_list_is_empty() {
         String result = MovieUtils.getMostPopularActor(List.of());
         assertEquals("No actor found", result);
     }
 
     @Test
-    void most_popular_actor_returns_one_actor_if_equally_popular() {
+    void getMostPopularActor_returns_one_actor_if_equally_popular() {
         // Given
         List<Movie> movies = List.of(movie1, movie2);
 
@@ -81,7 +81,7 @@ public class MovieUtilsTest {
     }
 
     @Test
-    void count_movies_from_returns_correct_movie_amount_from_given_director() {
+    void countMoviesFrom_returns_correct_movie_amount_from_given_director() {
         // Given
         List<Movie> movies = List.of(movie1, movie2, movie3, movie4, movie5, movie6, movie7);
 
@@ -93,7 +93,7 @@ public class MovieUtilsTest {
     }
 
     @Test
-    void count_movies_from_returns_0_if_no_movies_from_director_in_database() {
+    void countMoviesFrom_returns_0_if_no_movies_from_director_in_database() {
         // Given
         List<Movie> movies = List.of(movie1, movie2, movie3, movie4, movie5, movie6, movie7);
 
@@ -105,7 +105,7 @@ public class MovieUtilsTest {
     }
 
     @Test
-    void get_movies_between_years_returns_correct_movies() {
+    void getMoviesBetweenYears_returns_correct_movies() {
         // Given
         List<Movie> movies = List.of(movie1, movie2, movie3, movie4, movie5, movie6, movie7);
 
@@ -118,7 +118,7 @@ public class MovieUtilsTest {
     }
 
     @Test
-    void get_longest_movie_title_returns_correct_length() {
+    void getLongestMovieTitle_returns_correct_length() {
         // Given
         List<Movie> movies = List.of(movie1, movie2, movie3, movie4, movie5, movie6, movie7);
 
@@ -127,6 +127,18 @@ public class MovieUtilsTest {
 
         // Then
         assertEquals(25, result);
+    }
+
+    @Test
+    void getLongestMovieTitle_returns_default_if_list_is_empty() {
+        // Given
+        List<Movie> movies = List.of();
+
+        // When
+        int result = MovieUtils.getLongestMovieTitle(movies);
+
+        // Then
+        assertEquals(0, result);
     }
 
 }

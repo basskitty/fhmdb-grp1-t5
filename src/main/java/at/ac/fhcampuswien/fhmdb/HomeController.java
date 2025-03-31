@@ -23,6 +23,7 @@ import org.controlsfx.control.CheckComboBox;
 import java.net.URL;
 import java.util.*;
 
+
 public class HomeController implements Initializable
 {
 
@@ -72,7 +73,6 @@ public class HomeController implements Initializable
         );
         ratingComboBox.setPromptText("Select minimum rating");
 
-
         // SET EVENT LISTENERS
         searchBtn.setOnAction(e -> filterMovies());
 
@@ -94,8 +94,14 @@ public class HomeController implements Initializable
         // Fallback: If search text doesn't match with any title,
         // filter descriptions locally
         if (searchText != null && searchedMovies.isEmpty()) {
-            searchedMovies = filterDescriptionLocally(searchText, selectedGenre, selectedDecades, minRating);
+            List<Movie> moviesWithoutQueryFilter = getMoviesfromAPI(null, selectedGenre, selectedDecades, minRating);
+            searchedMovies = filterDescriptionLocally(searchText, moviesWithoutQueryFilter);
         }
+
+        // Testing results from MovieUtils methods
+        System.out.println("Most popular actor: " + MovieUtils.getMostPopularActor(searchedMovies));
+        System.out.println("Longest movie title: " + MovieUtils.getLongestMovieTitle(searchedMovies));
+        System.out.println("Movies directed by Peter Jackson: " + MovieUtils.countMoviesFrom(searchedMovies, "Peter Jackson"));
 
         // Update the observable list and refresh the ListView.
         observableMovies.setAll(searchedMovies);
@@ -143,7 +149,7 @@ public class HomeController implements Initializable
         return releaseYearComboBox.getCheckModel().getCheckedItems();
     }
 
-    private List<String> getSelectedYears(List<Decade> selectedDecades) {
+    public List<String> getSelectedYears(List<Decade> selectedDecades) {
         List<String> years = new ArrayList<>();
 
         if (selectedDecades == null || selectedDecades.isEmpty()) {
@@ -161,10 +167,10 @@ public class HomeController implements Initializable
     }
 
     // FALLBACK method: If search text input matches no titles, filter locally in description
-    private List<Movie> filterDescriptionLocally(String inputSearch, Genre selectedGenre, List<Decade> selectedDecades, String minRating) {
-            List<Movie> allMoviesNoSearch = getMoviesfromAPI(null, selectedGenre, selectedDecades, minRating);
-            return allMoviesNoSearch.stream()
-                    .filter(movie -> movie.getDescription().toLowerCase().contains(inputSearch))
+    public List<Movie> filterDescriptionLocally(String inputSearch, List<Movie> moviesFromAPI) {
+            return moviesFromAPI.stream()
+                    .filter(movie -> movie.getDescription() != null &&
+                            movie.getDescription().toLowerCase().contains(inputSearch))
                     .toList();
     }
 
