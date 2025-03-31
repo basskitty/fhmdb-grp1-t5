@@ -46,8 +46,9 @@ public class HomeController implements Initializable
     // This observable list backs the ListView.
     final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
-    // Public List<Movie> allMovies = Movie.initializeMovies();
-    public List<Movie> allMovies = MovieAPI.getAllMovies();
+    // Initialize API and load all movies on startup
+    MovieAPI movieAPI = new MovieAPI();
+    public List<Movie> allMovies = movieAPI.getAllMovies();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle)
@@ -89,12 +90,12 @@ public class HomeController implements Initializable
         String minRating = getSelectedRating();
         Genre selectedGenre = getSelectedGenre();
 
-        List<Movie> searchedMovies = getMoviesfromAPI(searchText, selectedGenre, selectedDecades, minRating);
+        List<Movie> searchedMovies = getMoviesFromAPI(searchText, selectedGenre, selectedDecades, minRating);
 
         // Fallback: If search text doesn't match with any title,
         // filter descriptions locally
         if (searchText != null && searchedMovies.isEmpty()) {
-            List<Movie> moviesWithoutQueryFilter = getMoviesfromAPI(null, selectedGenre, selectedDecades, minRating);
+            List<Movie> moviesWithoutQueryFilter = getMoviesFromAPI(null, selectedGenre, selectedDecades, minRating);
             searchedMovies = filterDescriptionLocally(searchText, moviesWithoutQueryFilter);
         }
 
@@ -111,19 +112,19 @@ public class HomeController implements Initializable
     }
 
 
-    List<Movie> getMoviesfromAPI(String query, Genre genre, List<Decade> selectedDecades, String rating)
+    List<Movie> getMoviesFromAPI(String query, Genre genre, List<Decade> selectedDecades, String rating)
     {
         List<String> selectedYears = getSelectedYears(selectedDecades);
 
         // If no decades selected → only 1 API call with null for releaseYear
         if (selectedYears.isEmpty()) {
-            return MovieAPI.getfilteredMovies(query, genre, null, rating);
+            return movieAPI.getFilteredMovies(query, genre, null, rating);
         }
 
         List<Movie> filteredMovies = new ArrayList<>();
 
         for (String year : selectedYears) {
-            List<Movie> response = MovieAPI.getfilteredMovies(query, genre, year, rating);
+            List<Movie> response = movieAPI.getFilteredMovies(query, genre, year, rating);
             filteredMovies.addAll(response);
         }
 

@@ -1,18 +1,6 @@
-/*
-
-** API DOCUMENATION
-https://prog2.fh-campuswien.ac.at/swagger-ui/index.html
-
-** USAGE EXAMPLES
-* Get all movies:
-List<Movie> allMovies = MovieAPI.getAllMovies();
-
-* Query for "the" in title:
-List<Movie> filteredMovies = MovieAPI.getAllMovies("the", null, null, null);
-
-* Get movie data by ID:
-Movie movieFromID = MovieAPI.getMovieByID(UUID.fromString("a45e4b03-ece7-49e7-8144-4f2a6fe03432"));
-
+/**
+ * API DOCUMENTATION
+ * {@link https://prog2.fh-campuswien.ac.at/swagger-ui/index.html}
  */
 
 package at.ac.fhcampuswien.fhmdb;
@@ -37,7 +25,7 @@ public class MovieAPI {
     public MovieAPI() {
     }
 
-    private static String buildURL(UUID id) {
+    private String buildURL(UUID id) {
         StringBuilder url = new StringBuilder(API_BASE_PATH);
         if (id != null) {
             url.append("/").append(id);
@@ -45,7 +33,7 @@ public class MovieAPI {
         return url.toString();
     }
 
-    private static String buildURL(String query, Genre genre, String year, String rating)
+    private String buildURL(String query, Genre genre, String year, String rating)
     {
         StringBuilder url = new StringBuilder(API_BASE_PATH);
 
@@ -71,26 +59,28 @@ public class MovieAPI {
         return url.toString();
     }
 
-    // Method to get all movies without filtering
-    public static List<Movie> getAllMovies() {
-        return getfilteredMovies(null, null, null, null);
+    /**
+     * Get all movies without filtering
+     */
+    public List<Movie> getAllMovies() {
+        return getFilteredMovies(null, null, null, null);
     }
 
-    // Method to get filtered movies
-    public static List<Movie> getfilteredMovies(String query, Genre genre, String year, String rating)
+    /**
+     * Get filtered movies<br/>
+     * e.g. movies with "the" in title: MovieAPI.getAllMovies("the", null, null, null);
+      */
+    public List<Movie> getFilteredMovies(String query, Genre genre, String year, String rating)
     {
         Request request = new Request.Builder()
                 .header("User-Agent", "http.agent")
                 .url(buildURL(query, genre, year, rating))
                 .build();
 
-        List<Movie> filteredMovies = parseMovies(request);
-
-        return filteredMovies;
+        return parseMovies(request);
     }
 
-
-    private static List<Movie> parseMovies(Request request)
+    private List<Movie> parseMovies(Request request)
     {
         try (Response response = client.newCall(request).execute())
         {
@@ -107,10 +97,12 @@ public class MovieAPI {
         }
     }
 
-
-
-    // Method to get movie by ID
-    public static Movie getMovieByID(UUID id) {
+    /**
+     * Get movie by ID
+     * @param id ID from the Movie Database
+     * @return Movie object
+     */
+    public Movie getMovieByID(UUID id) {
         Request request = new Request.Builder()
                 .header("User-Agent", "http.agent")
                 .url(buildURL(id))
