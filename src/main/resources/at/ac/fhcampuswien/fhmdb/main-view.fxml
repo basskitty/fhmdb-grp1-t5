@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="at.ac.fhcampuswien.fhmdb.MainController"
+            prefHeight="400.0" prefWidth="600.0">
+    <!-- Top navigation bar -->
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="42.0" prefWidth="347.0" spacing="20.0" style="-fx-background-color: black;">
+            <padding>
+                <Insets bottom="7.0" left="10.0" top="7.0" right="10.0"/>
+            </padding>
+            <Label style="-fx-background-color: F5C518;" text="FHMDb">
+                <font>
+                    <Font name="Calibri Bold" size="24.0" />
+                </font>
+                <padding>
+                    <Insets left="2.0" right="2.0" />
+                </padding>
+            </Label>
+            <Label styleClass="text-white" stylesheets="@styles.css" text="Welcome to FHMDb!" />
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="homeBtn" styleClass="button" text="Home" />
+            <Button fx:id="watchlistBtn" styleClass="button" text="Watchlist" />
+        </HBox>
+    </top>
+
+    <!-- Placeholder for other view -->
+    <center>
+        <StackPane fx:id="contentPane" />
+    </center>
+</BorderPane>
+
