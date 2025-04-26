@@ -5,16 +5,17 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.text.Font?>
+
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="at.ac.fhcampuswien.fhmdb.MainController"
-            prefHeight="400.0" prefWidth="600.0">
+            fx:controller="at.ac.fhcampuswien.fhmdb.MainController">
+
     <!-- Top navigation bar -->
     <top>
-        <HBox alignment="CENTER_LEFT" prefHeight="42.0" prefWidth="347.0" spacing="20.0" style="-fx-background-color: black;">
+        <HBox fx:id="topHBox" alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: black;"
+              BorderPane.alignment="CENTER">
             <padding>
                 <Insets bottom="7.0" left="10.0" top="7.0" right="10.0"/>
             </padding>
@@ -27,10 +28,17 @@
                 </padding>
             </Label>
             <Label styleClass="text-white" stylesheets="@styles.css" text="Welcome to FHMDb!" />
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="homeBtn" styleClass="button" text="Home" />
-            <Button fx:id="watchlistBtn" styleClass="button" text="Watchlist" />
+
+            <Region fx:id="spacer" HBox.hgrow="ALWAYS"/>
+
+            <HBox fx:id="navigationBox" alignment="CENTER" spacing="10" visible="false">
+                <Button fx:id="homeBtn" styleClass="nav-button" text="HOME" />
+                <Button fx:id="watchlistBtn" styleClass="nav-button" text="WATCHLIST" />
+            </HBox>
+            <!-- Sandwich Button -->
+            <Button fx:id="menuBtn" text="☰" styleClass="sandwich-button"/>
         </HBox>
+
     </top>
 
     <!-- Placeholder for other view -->

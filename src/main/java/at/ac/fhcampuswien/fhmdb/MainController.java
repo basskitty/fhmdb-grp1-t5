@@ -1,17 +1,20 @@
 package at.ac.fhcampuswien.fhmdb;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.control.Button;
 
 import java.io.IOException;
 
-import static javafx.application.ConditionalFeature.FXML;
-
 public class MainController {
     @FXML
+    private HBox topHBox;
+
+    @FXML
     private StackPane contentPane;
+
+    @FXML
+    private Button menuBtn;
 
     @FXML
     private Button homeBtn;
@@ -20,10 +23,28 @@ public class MainController {
     private Button watchlistBtn;
 
     @FXML
+    private HBox navigationBox;
+
+    @FXML
+    private Region spacer;
+
+    @FXML
     public void initialize() {
+        // --- HBox auf Maximalbreite setzen ---
+        topHBox.setPrefWidth(Double.MAX_VALUE);
+
+        // --- Spacer wachsen lassen ---
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         // Buttons verknüpfen
         homeBtn.setOnAction(e -> loadView("home-view.fxml"));
         watchlistBtn.setOnAction(e -> loadView("watchlist-view.fxml"));
+
+        // --- Sandwich Menü Toggle ---
+        menuBtn.setOnAction(event -> {
+            boolean isVisible = navigationBox.isVisible();
+            navigationBox.setVisible(!isVisible);
+        });
 
         // Standard Start-View
         loadView("home-view.fxml");

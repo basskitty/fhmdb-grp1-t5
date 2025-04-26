@@ -1,3 +1,6 @@
+.button, .jfx-button, .combo-box, .choice-box, .check-box, .radio-button:hover {
+    -fx-cursor: hand;
+}
 
 .background-yellow {
     -fx-background-color: #f5c518;
@@ -75,4 +78,29 @@
 
 .button:hover {
     -fx-background-color: #fcd34d;
+}
+
+.nav-button {
+    -fx-background-color: #cccccc;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    /*-fx-padding: 6 12 6 12; */
+}
+
+.nav-button:hover {
+    -fx-background-color: #dddddd; /* noch ein bisschen heller beim Hover */
+}
+
+.sandwich-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 42px; /* größer! */
+    -fx-font-weight: bold;
+    -fx-padding: 5 12 5 12; /* genug Abstand */
+    -fx-border-color: transparent;
+}
+
+.sandwich-button:hover {
+    -fx-background-color: #000000;
 }
