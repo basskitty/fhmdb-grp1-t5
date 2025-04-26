@@ -1,4 +1,5 @@
 package at.ac.fhcampuswien.fhmdb;
+import at.ac.fhcampuswien.fhmdb.WatchlistRepository;
 
 import at.ac.fhcampuswien.fhmdb.models.Decade;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
@@ -58,7 +59,10 @@ public class HomeController implements Initializable
         observableMovies.addAll(allMovies);
 
         movieListView.setItems(observableMovies);
-        movieListView.setCellFactory(listView -> new MovieCell());
+        movieListView.setCellFactory(listView -> new MovieCell(movie -> {
+            WatchlistRepository.addMovie(movie);
+            System.out.println(movie.getTitle() + " added to watchlist!");
+        }, "Add to Watchlist"));
 
         // LOAD GENRES
         // Populate the ComboBox with all Genre enum values.

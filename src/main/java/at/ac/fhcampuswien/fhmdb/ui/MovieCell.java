@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.fhmdb.ui;
 
 import at.ac.fhcampuswien.fhmdb.models.Movie;
+import com.jfoenix.controls.JFXButton;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -18,13 +19,20 @@ public class MovieCell extends ListCell<Movie>
     private final Label detail = new Label();
     private final Label genresLabel = new Label();
 
-    private final Button detailsButton = new Button("Show Details");
-    private final Button watchlistButton = new Button("Add to Watchlist");
+    private final JFXButton detailsBtn = new JFXButton("Show Details");
+    private final JFXButton actionBtn = new JFXButton();
+    private final HBox buttonBox = new HBox(detailsBtn, actionBtn);
 
     private final HBox layout = new HBox();
+    private final VBox textContent = new VBox(title, detail, genresLabel);
 
-    public MovieCell() {
+    private final ClickEventHandler<Movie> actionHandler;
+    private final String buttonLabel;
+
+    public MovieCell(ClickEventHandler<Movie> actionHandler, String buttonLabel) {
         super();
+        this.actionHandler = actionHandler;
+        this.buttonLabel = buttonLabel;
 
         layout.setPadding(new Insets(10));
         layout.setSpacing(10);
@@ -39,19 +47,23 @@ public class MovieCell extends ListCell<Movie>
 
         // Layout configuration
         detail.setWrapText(true);
-        VBox textContent = new VBox(title, detail, genresLabel);
         textContent.setSpacing(5);
         textContent.setPadding(new Insets(0, 20, 0, 0));
         textContent.setMaxWidth(600);
 
         // Button Container
-        HBox buttonBox = new HBox(detailsButton, watchlistButton);
         buttonBox.setSpacing(10);
         buttonBox.setAlignment(Pos.TOP_RIGHT);
 
         // Spacer to push buttons to the right
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        actionBtn.setOnAction(event -> {
+            if (getItem() != null && actionHandler != null) {
+                actionHandler.onClick(getItem());
+            }
+        });
 
         layout.getChildren().addAll(textContent, spacer, buttonBox);
     }
@@ -75,6 +87,8 @@ public class MovieCell extends ListCell<Movie>
                     .map(genre -> genre.toString().toUpperCase())
                     .collect(Collectors.joining(", "));
             genresLabel.setText(genresString);
+
+            actionBtn.setText(buttonLabel);
 
             // Finally, set the graphic for the cell.
             setGraphic(layout);
