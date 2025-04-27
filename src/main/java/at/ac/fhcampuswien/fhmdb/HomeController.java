@@ -67,6 +67,7 @@ public class HomeController implements Initializable
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        //TODO add API exception -> read from DB
     }
 
     public void initializeUi () {
