@@ -81,15 +81,24 @@
 }
 
 .nav-button {
-    -fx-background-color: #cccccc;
-    -fx-text-fill: #000000;
-    -fx-background-radius: 5;
-    -fx-border-radius: 5;
-    /*-fx-padding: 6 12 6 12; */
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
 }
 
 .nav-button:hover {
-    -fx-background-color: #dddddd; /* noch ein bisschen heller beim Hover */
+    -fx-text-fill: white;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.active-nav-button {
+    -fx-text-fill: white;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 0;
 }
 
 .sandwich-button {
@@ -99,6 +108,7 @@
     -fx-font-weight: bold;
     -fx-padding: 5 12 5 12; /* genug Abstand */
     -fx-border-color: transparent;
+    -fx-translate-y: -2px;
 }
 
 .sandwich-button:hover {

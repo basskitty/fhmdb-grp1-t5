@@ -8,9 +8,6 @@ import java.io.IOException;
 
 public class MainController {
     @FXML
-    private HBox topHBox;
-
-    @FXML
     private StackPane contentPane;
 
     @FXML
@@ -25,25 +22,20 @@ public class MainController {
     @FXML
     private HBox navigationBox;
 
-    @FXML
-    private Region spacer;
-
-    @FXML
     public void initialize() {
-        // --- HBox auf Maximalbreite setzen ---
-        topHBox.setPrefWidth(Double.MAX_VALUE);
-
-        // --- Spacer wachsen lassen ---
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        // Buttons verknüpfen
+        // Connect buttons
         homeBtn.setOnAction(e -> loadView("home-view.fxml"));
         watchlistBtn.setOnAction(e -> loadView("watchlist-view.fxml"));
 
-        // --- Sandwich Menü Toggle ---
+        // Toggle sandwich menu
         menuBtn.setOnAction(event -> {
-            boolean isVisible = navigationBox.isVisible();
-            navigationBox.setVisible(!isVisible);
+            if (navigationBox.isVisible()) {
+                menuBtn.setText("☰");
+                navigationBox.setVisible(false);
+            } else {
+                menuBtn.setText("×");
+                navigationBox.setVisible(true);
+            }
         });
 
         // Standard Start-View
@@ -54,8 +46,25 @@ public class MainController {
         try {
             Pane view = FXMLLoader.load(getClass().getResource(fxmlFile));
             contentPane.getChildren().setAll(view);
+
+            updateNavigationButtons(fxmlFile);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void updateNavigationButtons(String fxmlFile) {
+        homeBtn.getStyleClass().remove("active-nav-button");
+        watchlistBtn.getStyleClass().remove("active-nav-button");
+
+        if (fxmlFile.equals("home-view.fxml")) {
+            if (!homeBtn.getStyleClass().contains("active-nav-button")) {
+                homeBtn.getStyleClass().add("active-nav-button");
+            }
+        } else if (fxmlFile.equals("watchlist-view.fxml")) {
+            if (!watchlistBtn.getStyleClass().contains("active-nav-button")) {
+                watchlistBtn.getStyleClass().add("active-nav-button");
+            }
         }
     }
 }

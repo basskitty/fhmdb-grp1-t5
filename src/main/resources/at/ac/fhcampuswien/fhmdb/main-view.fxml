@@ -14,7 +14,7 @@
 
     <!-- Top navigation bar -->
     <top>
-        <HBox fx:id="topHBox" alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: black;"
+        <HBox alignment="CENTER_LEFT" spacing="20.0" style="-fx-background-color: black;"
               BorderPane.alignment="CENTER">
             <padding>
                 <Insets bottom="7.0" left="10.0" top="7.0" right="10.0"/>
@@ -29,7 +29,7 @@
             </Label>
             <Label styleClass="text-white" stylesheets="@styles.css" text="Welcome to FHMDb!" />
 
-            <Region fx:id="spacer" HBox.hgrow="ALWAYS"/>
+            <Region HBox.hgrow="ALWAYS"/>
 
             <HBox fx:id="navigationBox" alignment="CENTER" spacing="10" visible="false">
                 <Button fx:id="homeBtn" styleClass="nav-button" text="HOME" />
