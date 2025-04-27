@@ -1,5 +1,7 @@
 package at.ac.fhcampuswien.fhmdb;
-import at.ac.fhcampuswien.fhmdb.WatchlistRepository;
+import at.ac.fhcampuswien.fhmdb.database.MovieEntity;
+import at.ac.fhcampuswien.fhmdb.database.MovieRepository;
+import at.ac.fhcampuswien.fhmdb.database.WatchlistRepository;
 
 import at.ac.fhcampuswien.fhmdb.models.Decade;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
@@ -22,6 +24,7 @@ import javafx.scene.layout.VBox;
 import org.controlsfx.control.CheckComboBox;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.*;
 
 
@@ -47,13 +50,26 @@ public class HomeController implements Initializable
     // This observable list backs the ListView.
     final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
-    // Initialize API and load all movies on startup
     MovieAPI movieAPI = new MovieAPI();
-    public List<Movie> allMovies = movieAPI.getAllMovies();
+    List<Movie> allMovies;
 
     @Override
-    public void initialize(URL url, ResourceBundle resourceBundle)
-    {
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        initializeData();
+        initializeUi();
+    }
+
+    public void initializeData () {
+
+        try {
+            allMovies = movieAPI.getAllMovies();
+            saveMoviesToDatabase(allMovies);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void initializeUi () {
         // LOAD MOVIES
         // Load all Movies & Set List View to observable List
         observableMovies.addAll(allMovies);
@@ -133,6 +149,17 @@ public class HomeController implements Initializable
         }
 
         return filteredMovies;
+    }
+
+    private void saveMoviesToDatabase(List<Movie> movies) throws SQLException {
+        MovieRepository movieRepository = new MovieRepository();
+        movieRepository.removeAll();
+        movieRepository.addAllMovies(movies);
+    }
+
+    private List<Movie> getMoviesFromDatabase() throws SQLException {
+        MovieRepository movieRepository = new MovieRepository();
+        return MovieEntity.toMovies(movieRepository.getAllMovies());
     }
 
     // GETTER methods for user input
