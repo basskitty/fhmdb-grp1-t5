@@ -5,9 +5,12 @@
 
 package at.ac.fhcampuswien.fhmdb;
 
+import at.ac.fhcampuswien.fhmdb.exceptions.MovieApiException;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -22,14 +25,19 @@ public class MovieAPI {
     public static final OkHttpClient client = new OkHttpClient();
     public static final String URL_DELIMITER = "&";
 
-    public MovieAPI() {
+    public MovieAPI() 
+    {
     }
 
-    private String buildURL(UUID id) {
+    private String buildURL(UUID id) 
+    {
         StringBuilder url = new StringBuilder(API_BASE_PATH);
-        if (id != null) {
+        
+        if (id != null) 
+        {
             url.append("/").append(id);
         }
+
         return url.toString();
     }
 
@@ -62,7 +70,7 @@ public class MovieAPI {
     /**
      * Get all movies without filtering
      */
-    public List<Movie> getAllMovies() {
+    public List<Movie> getAllMovies() throws MovieApiException{
         return getFilteredMovies(null, null, null, null);
     }
 
@@ -70,7 +78,7 @@ public class MovieAPI {
      * Get filtered movies<br/>
      * e.g. movies with "the" in title: MovieAPI.getAllMovies("the", null, null, null);
       */
-    public List<Movie> getFilteredMovies(String query, Genre genre, String year, String rating)
+    public List<Movie> getFilteredMovies(String query, Genre genre, String year, String rating) throws MovieApiException
     {
         Request request = new Request.Builder()
                 .header("User-Agent", "http.agent")
@@ -80,16 +88,47 @@ public class MovieAPI {
         return parseMovies(request);
     }
 
-    private List<Movie> parseMovies(Request request)
+    private List<Movie> parseMovies(Request request) throws MovieApiException
     {
         try (Response response = client.newCall(request).execute())
         {
-            String jsonResponse = Objects.requireNonNull(response.body()).string();
-            Gson gson = new Gson();
-            Movie[] movies = gson.fromJson(jsonResponse, Movie[].class);
+            // 1) HTTP error
+            if (!response.isSuccessful()) 
+            {
+                int code = response.code();
 
-            System.out.println("Returned movies: " + Arrays.toString(movies));
-            return Arrays.asList(movies);
+                throw new MovieApiException(
+                    "API_HTTP_" + code,
+                    "Nicht erfolgreiche Antwort vom Movie Service: HTTP " + code,
+                    "Filme konnten nicht geladen werden (Server Fehler)."
+                );
+            }
+
+            // 2) Body absent
+            if (response.body() == null) 
+            {
+                throw new MovieApiException(
+                    "API_NO_BODY",
+                    "Leerer Response Body von Movie Service",
+                    "Fehlerhafte Antwort vom Filmdienst."
+                );
+            }
+
+
+            String json = response.body().string();
+            try 
+            {
+                Movie[] movies = new Gson().fromJson(json, Movie[].class);
+                return Arrays.asList(movies);
+            } 
+            catch (JsonSyntaxException ex) 
+            {
+                throw new MovieApiException(
+                    "API_PARSE_ERROR",
+                    "JSON Parsing Fehler: " + ex.getMessage(),
+                    "Fehler beim Verarbeiten der Filmdaten."
+                , ex);
+            }
         }
         catch (IOException e)
         {
@@ -102,21 +141,44 @@ public class MovieAPI {
      * @param id ID from the Movie Database
      * @return Movie object
      */
-    public Movie getMovieByID(UUID id) {
+    public Movie getMovieByID(UUID id) throws MovieApiException {
         Request request = new Request.Builder()
                 .header("User-Agent", "http.agent")
-                .url(buildURL(id))
+                .url(buildURL(Objects.requireNonNull(id)))
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
-            String jsonResponse = Objects.requireNonNull(response.body()).string();
-            Gson gson = new Gson();
-            Movie movie = gson.fromJson(jsonResponse, Movie.class);
-            System.out.println("Returned movie: " + movie);
-
-            return movie;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            if (!response.isSuccessful()) {
+                int code = response.code();
+                throw new MovieApiException(
+                    "API_HTTP_" + code,
+                    "Nicht‐erfolgreiche Antwort vom Movie‐Service: HTTP " + code,
+                    "Filmdetails konnten nicht geladen werden (Server‐Fehler)."
+                );
+            }
+            if (response.body() == null) {
+                throw new MovieApiException(
+                    "API_NO_BODY",
+                    "Leerer Response‐Body von Movie‐Service",
+                    "Filmdetails konnten nicht geladen werden."
+                );
+            }
+            String json = response.body().string();
+            try {
+                return new Gson().fromJson(json, Movie.class);
+            } catch (JsonSyntaxException ex) {
+                throw new MovieApiException(
+                    "API_PARSE_ERROR",
+                    "JSON‐Parsing Fehler: " + ex.getMessage(),
+                    "Fehler beim Verarbeiten der Filmdaten."
+                , ex);
+            }
+        } catch (IOException ex) {
+            throw new MovieApiException(
+                "API_IO_ERROR",
+                "I/O Fehler beim API‐Aufruf: " + ex.getMessage(),
+                "Konnte nicht mit dem Filmdienst verbinden."
+            , ex);
         }
     }
 }

@@ -2,7 +2,8 @@ package at.ac.fhcampuswien.fhmdb;
 import at.ac.fhcampuswien.fhmdb.database.MovieEntity;
 import at.ac.fhcampuswien.fhmdb.database.MovieRepository;
 import at.ac.fhcampuswien.fhmdb.database.WatchlistRepository;
-
+import at.ac.fhcampuswien.fhmdb.exceptions.DatabaseException;
+import at.ac.fhcampuswien.fhmdb.exceptions.MovieApiException;
 import at.ac.fhcampuswien.fhmdb.models.Decade;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
@@ -21,7 +22,9 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 import org.controlsfx.control.CheckComboBox;
+import org.controlsfx.control.Notifications;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -50,6 +53,8 @@ public class HomeController implements Initializable
     // This observable list backs the ListView.
     final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
+    private WatchlistRepository watchlistRepository;
+
     MovieAPI movieAPI = new MovieAPI();
     List<Movie> allMovies;
 
@@ -61,26 +66,75 @@ public class HomeController implements Initializable
 
     public void initializeData () {
 
-        try {
+        try 
+        {
             allMovies = movieAPI.getAllMovies();
             saveMoviesToDatabase(allMovies);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } 
+        catch (MovieApiException e) 
+        {
+             // API failed → inform user, then fallback to DB
+             showNotification(
+                "API-Fehler",
+                e.getUserMessage(),
+                3.0,
+                Pos.BOTTOM_RIGHT,
+                NotificationType.ERROR
+            );
+            try {
+                allMovies = getMoviesFromDatabase();
+            } catch (DatabaseException dbEx) {
+                // DB also failed → inform user and leave list empty
+                showNotification(
+                    "Datenbank-Fehler",
+                    dbEx.getUserMessage(),
+                    3.0,
+                    Pos.BOTTOM_RIGHT,
+                    NotificationType.ERROR
+                );
+                allMovies = Collections.emptyList();
+            }
         }
-        //TODO add API exception -> read from DB
+        catch(DatabaseException e)
+        {
+            // Saving to DB failed on first run → inform user, but still proceed with API data
+            showNotification(
+                "Datenbank-Fehler",
+                e.getUserMessage(),
+                3.0,
+                Pos.BOTTOM_RIGHT,
+                NotificationType.WARNING
+            );
+        }
     }
 
     public void initializeUi () {
         // LOAD MOVIES
-        // Load all Movies & Set List View to observable List
+        // Load all Movies & Set List View to observable List   
+         // Prepare watchlist repository
+         try {
+            watchlistRepository = new WatchlistRepository();
+        } catch (DatabaseException dbEx) {
+            showNotification("Datenbank-Fehler", dbEx.getUserMessage(),
+                             3.0, Pos.BOTTOM_RIGHT, NotificationType.ERROR);
+            // disable watchlist adds:
+            watchlistRepository = null;
+        }
+        
+        
         observableMovies.addAll(allMovies);
-
         movieListView.setItems(observableMovies);
-        WatchlistRepository watchlistRepository = new WatchlistRepository();
-
         movieListView.setCellFactory(listView -> new MovieCell(movie -> {
-            watchlistRepository.addMovie(movie);
-            System.out.println(movie.getTitle() + " added to watchlist!");
+            if (watchlistRepository != null) {
+                try {
+                    watchlistRepository.addMovie(movie);
+                    showNotification("Watchlist", "„" + movie.getTitle() + "“ hinzugefügt.",
+                                     2.5, Pos.BOTTOM_RIGHT, NotificationType.CONFIRM);
+                } catch (DatabaseException e) {
+                    showNotification("Datenbank-Fehler", e.getUserMessage(),
+                                     3.0, Pos.BOTTOM_RIGHT, NotificationType.ERROR);
+                }
+            }
         }, "Add to Watchlist"));
 
         // LOAD GENRES
@@ -98,14 +152,26 @@ public class HomeController implements Initializable
         ratingComboBox.setPromptText("Select minimum rating");
 
         // SET EVENT LISTENERS
-        searchBtn.setOnAction(e -> filterMovies());
+        searchBtn.setOnAction(e -> {
+            try {
+                filterMovies();
+            } catch (MovieApiException apiEx) {
+                showNotification(
+                    "API-Fehler",
+                    apiEx.getUserMessage(),
+                    3.0,
+                    Pos.BOTTOM_RIGHT,
+                    NotificationType.ERROR
+                );
+            }
+        });
 
         sortBtn.setText(Sorting.NAME_ASC.buttonText);
         sortBtn.setOnAction(e -> sortMovies());
     }
 
 
-    void filterMovies()
+    void filterMovies() throws MovieApiException
     {
         // Retrieve selected filters from user inputs
         String searchText = getSearchText();
@@ -135,7 +201,7 @@ public class HomeController implements Initializable
     }
 
 
-    List<Movie> getMoviesFromAPI(String query, Genre genre, List<Decade> selectedDecades, String rating)
+    List<Movie> getMoviesFromAPI(String query, Genre genre, List<Decade> selectedDecades, String rating) throws MovieApiException
     {
         List<String> selectedYears = getSelectedYears(selectedDecades);
 
@@ -154,13 +220,15 @@ public class HomeController implements Initializable
         return filteredMovies;
     }
 
-    private void saveMoviesToDatabase(List<Movie> movies) throws SQLException {
+    private void saveMoviesToDatabase(List<Movie> movies) throws DatabaseException
+    {
         MovieRepository movieRepository = new MovieRepository();
         movieRepository.removeAll();
         movieRepository.addAllMovies(movies);
     }
 
-    private List<Movie> getMoviesFromDatabase() throws SQLException {
+    private List<Movie> getMoviesFromDatabase() throws DatabaseException  
+    {
         MovieRepository movieRepository = new MovieRepository();
         return MovieEntity.toMovies(movieRepository.getAllMovies());
     }
@@ -252,6 +320,40 @@ public class HomeController implements Initializable
                 releaseYearComboBox.setTitle(null); // empty when selection is made
             }
         });
+    }
+
+
+
+     
+    /**
+     * Displays a toast‐style notification in the corner.
+     *
+     * @param title    the bold heading on the popup
+     * @param message  the body text
+     * @param seconds  how many seconds to stay visible
+     * @param position where on screen (e.g. BOTTOM_RIGHT)
+     * @param type     style (INFO/WARNING/ERROR/CONFIRM)
+     */
+    public enum NotificationType {
+        INFO, WARNING, ERROR, CONFIRM
+    }
+    private void showNotification(String title,
+                                  String message,
+                                  double seconds,
+                                  Pos position,
+                                  NotificationType type) {
+        Notifications notif = Notifications.create()
+                                 .title(title)
+                                 .text(message)
+                                 .hideAfter(Duration.seconds(seconds))
+                                 .position(position);
+
+        switch (type) {
+            case ERROR    -> notif.showError();
+            case WARNING  -> notif.showWarning();
+            case CONFIRM  -> notif.showConfirm();
+            default       -> notif.showInformation();
+        }
     }
 
 }
