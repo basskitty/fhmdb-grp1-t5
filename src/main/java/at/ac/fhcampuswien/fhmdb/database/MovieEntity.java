@@ -85,7 +85,7 @@ public class MovieEntity {
                             movieEntity.getApiId(),
                             movieEntity.getTitle(),
                             movieEntity.getGenres(),
-                            movieEntity.releaseYear,
+                            movieEntity.getReleaseYear(),
                             movieEntity.getDescription(),
                             movieEntity.getImgUrl(),
                             movieEntity.getLengthInMinutes(),

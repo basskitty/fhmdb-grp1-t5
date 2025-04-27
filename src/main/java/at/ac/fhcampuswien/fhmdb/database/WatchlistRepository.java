@@ -14,6 +14,7 @@ public class WatchlistRepository {
         this.dao = dao;
     }
 
+    //TODO uncomment when old code is obsolete
 //    public List<WatchlistMovieEntity> getWatchlist() {
 //        try {
 //            return dao.queryForAll();
@@ -38,7 +39,7 @@ public class WatchlistRepository {
         }
     }
 
- // OLD CODE WITHOUT DATABASE
+    //TODO Old code used without database - remove when WatchlistController is changed
     private static final List<Movie> watchlist = new ArrayList<>();
 
     public static List<Movie> getWatchlist() {

@@ -19,6 +19,8 @@ public class WatchlistController implements Initializable {
     @FXML
     private JFXListView<Movie> watchlistView;
 
+    //TODO change code for usage of database watchlist
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         watchlistView.setCellFactory(listView -> new MovieCell(movie -> {
