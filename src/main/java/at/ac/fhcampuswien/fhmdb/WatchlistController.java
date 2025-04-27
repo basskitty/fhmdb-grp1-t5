@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb;
 
+import at.ac.fhcampuswien.fhmdb.database.WatchlistMovieEntity;
 import at.ac.fhcampuswien.fhmdb.database.WatchlistRepository;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
@@ -13,29 +14,38 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class WatchlistController implements Initializable {
     @FXML
     private JFXListView<Movie> watchlistView;
 
-    //TODO change code for usage of database watchlist
+    private final WatchlistRepository watchlistRepository = new WatchlistRepository();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        watchlistView.setCellFactory(listView -> new MovieCell(movie -> {
-            WatchlistRepository.removeMovie(movie);
-            watchlistView.setItems(FXCollections.observableArrayList(WatchlistRepository.getWatchlist()));
-        }, "Remove"));
+        updateWatchlistView();
 
-        if (WatchlistRepository.getWatchlist().isEmpty()) {
+        watchlistView.setCellFactory(listView -> new MovieCell(movie -> {
+            watchlistRepository.removeMovie(movie);
+            updateWatchlistView();
+        }, "Remove"));
+    }
+
+    private void updateWatchlistView() {
+        List<Movie> movies = watchlistRepository.getMoviesFromWatchlist();
+
+        if (movies.isEmpty()) {
+            watchlistView.getItems().clear();
             createWatchlistPlaceholder();
         } else {
-            watchlistView.setItems(FXCollections.observableArrayList(WatchlistRepository.getWatchlist()));
+            watchlistView.setItems(FXCollections.observableArrayList(movies));
         }
     }
 
-    // Create placeholder if there are no movies matching with the chosen filters
+    // Create placeholder if the watchlist is empty
     private void createWatchlistPlaceholder() {
         Label placeholderLabel = new Label("No movies on watchlist yet.");
         placeholderLabel.getStyleClass().add("placeholder-label");

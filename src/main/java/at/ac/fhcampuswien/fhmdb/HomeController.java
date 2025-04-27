@@ -76,8 +76,10 @@ public class HomeController implements Initializable
         observableMovies.addAll(allMovies);
 
         movieListView.setItems(observableMovies);
+        WatchlistRepository watchlistRepository = new WatchlistRepository();
+
         movieListView.setCellFactory(listView -> new MovieCell(movie -> {
-            WatchlistRepository.addMovie(movie);
+            watchlistRepository.addMovie(movie);
             System.out.println(movie.getTitle() + " added to watchlist!");
         }, "Add to Watchlist"));
 
