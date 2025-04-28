@@ -19,19 +19,14 @@ public class MovieCell extends ListCell<Movie>
     private final Label detail = new Label();
     private final Label genresLabel = new Label();
 
-    private final JFXButton detailsBtn = new JFXButton("Show Details");
     private final JFXButton actionBtn = new JFXButton();
-    private final HBox buttonBox = new HBox(detailsBtn, actionBtn);
 
     private final HBox layout = new HBox();
-    private final VBox textContent = new VBox(title, detail, genresLabel);
 
-    private final ClickEventHandler<Movie> actionHandler;
     private final String buttonLabel;
 
     public MovieCell(ClickEventHandler<Movie> actionHandler, String buttonLabel) {
         super();
-        this.actionHandler = actionHandler;
         this.buttonLabel = buttonLabel;
 
         layout.setPadding(new Insets(10));
@@ -47,11 +42,14 @@ public class MovieCell extends ListCell<Movie>
 
         // Layout configuration
         detail.setWrapText(true);
+        VBox textContent = new VBox(title, detail, genresLabel);
         textContent.setSpacing(5);
         textContent.setPadding(new Insets(0, 20, 0, 0));
         textContent.setMaxWidth(600);
 
         // Button Container
+        JFXButton detailsBtn = new JFXButton("Show Details");
+        HBox buttonBox = new HBox(detailsBtn, actionBtn);
         buttonBox.setSpacing(10);
         buttonBox.setAlignment(Pos.TOP_RIGHT);
 

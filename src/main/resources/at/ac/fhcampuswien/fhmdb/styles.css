@@ -10,6 +10,10 @@
     -fx-background-color: #000000;
 }
 
+.background-darkgrey {
+    -fx-background-color: #1d1d1d;
+}
+
 .background-light-black {
     -fx-background-color: #454545;
 }
@@ -104,9 +108,9 @@
 .sandwich-button {
     -fx-background-color: transparent;
     -fx-text-fill: white;
-    -fx-font-size: 42px; /* größer! */
+    -fx-font-size: 42px;
     -fx-font-weight: bold;
-    -fx-padding: 5 12 5 12; /* genug Abstand */
+    -fx-padding: 5 12 5 12;
     -fx-border-color: transparent;
     -fx-translate-y: -2px;
 }

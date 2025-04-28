@@ -34,6 +34,7 @@
             <HBox fx:id="navigationBox" alignment="CENTER" spacing="10" visible="false">
                 <Button fx:id="homeBtn" styleClass="nav-button" text="HOME" />
                 <Button fx:id="watchlistBtn" styleClass="nav-button" text="WATCHLIST" />
+                <Button fx:id="aboutBtn" styleClass="nav-button" text="ABOUT" />
             </HBox>
             <!-- Sandwich Button -->
             <Button fx:id="menuBtn" text="☰" styleClass="sandwich-button"/>
