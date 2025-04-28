@@ -4,7 +4,7 @@ module at.ac.fhcampuswien.fhmdb {
     requires org.controlsfx.controls;
     requires com.jfoenix;
     requires okhttp3;
-    requires gson;
+    requires com.google.gson;
     requires ormlite.jdbc;
     requires java.sql;
     requires java.desktop;
