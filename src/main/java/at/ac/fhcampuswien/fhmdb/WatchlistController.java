@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.fhmdb;
 
 import at.ac.fhcampuswien.fhmdb.database.WatchlistMovieEntity;
 import at.ac.fhcampuswien.fhmdb.database.WatchlistRepository;
+import at.ac.fhcampuswien.fhmdb.exceptions.DatabaseException;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXListView;
@@ -16,7 +17,6 @@ import javafx.scene.layout.VBox;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class WatchlistController implements Initializable {
     @FXML
@@ -24,24 +24,36 @@ public class WatchlistController implements Initializable {
 
     private final WatchlistRepository watchlistRepository = new WatchlistRepository();
 
+    public WatchlistController() throws DatabaseException {
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         updateWatchlistView();
 
         watchlistView.setCellFactory(listView -> new MovieCell(movie -> {
-            watchlistRepository.removeMovie(movie);
-            updateWatchlistView();
+            try {
+                watchlistRepository.removeMovie(movie);
+                updateWatchlistView();
+            } catch (DatabaseException e) {
+                throw new RuntimeException(e);
+            }
         }, "Remove"));
+
     }
 
     private void updateWatchlistView() {
-        List<Movie> movies = watchlistRepository.getMoviesFromWatchlist();
+        try {
+            List<Movie> movies = watchlistRepository.getMoviesFromWatchlist();
 
-        if (movies.isEmpty()) {
-            watchlistView.getItems().clear();
-            createWatchlistPlaceholder();
-        } else {
-            watchlistView.setItems(FXCollections.observableArrayList(movies));
+            if (movies.isEmpty()) {
+                watchlistView.getItems().clear();
+                createWatchlistPlaceholder();
+            } else {
+                watchlistView.setItems(FXCollections.observableArrayList(movies));
+            }
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
         }
     }
 

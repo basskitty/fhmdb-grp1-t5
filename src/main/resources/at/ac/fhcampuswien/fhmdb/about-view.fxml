@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx"
+      spacing="10.0"
+      stylesheets="@styles.css"
+      styleClass="background-darkgrey">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="20"/>
+    </padding>
+
+    <Label text="FHMDb © The Sunset Cats" styleClass="placeholder-label" />
+    <Label text="FH Campus Wien - Programming 2, 2025" styleClass="placeholder-label" />
+</VBox>
