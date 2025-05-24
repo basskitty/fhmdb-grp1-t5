@@ -7,6 +7,7 @@ import javafx.util.Duration;
 import javafx.scene.control.Button;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.controlsfx.control.Notifications;
 
@@ -27,12 +28,16 @@ public class MainController {
     private Button watchlistBtn;
 
     @FXML
+    private Button aboutBtn;
+
+    @FXML
     private HBox navigationBox;
 
     public void initialize() {
         // Connect buttons
         homeBtn.setOnAction(e -> loadView("home-view.fxml"));
         watchlistBtn.setOnAction(e -> loadView("watchlist-view.fxml"));
+        aboutBtn.setOnAction(e -> loadView("about-view.fxml"));
 
         // Toggle sandwich menu
         menuBtn.setOnAction(event -> {
@@ -53,7 +58,7 @@ public class MainController {
     private void loadView(String fxmlFile) {
         try {
             Pane view = FXMLLoader.load(
-                getClass().getResource(fxmlFile)
+                    Objects.requireNonNull(getClass().getResource(fxmlFile))
             );
             contentPane.getChildren().setAll(view);
             updateNavigationButtons(fxmlFile);
@@ -61,48 +66,65 @@ public class MainController {
         catch (Exception ex) {
             Throwable cause = ex.getCause();
             if (cause instanceof MovieApiException apiEx) {
-                showNotification(
+
+            }
+            else if (cause instanceof DatabaseException dbEx) {
+
+            }
+            else {
+
+            }
+        }
+    }
+    /* showNotification(
                     "API-Fehler",
                     apiEx.getUserMessage(),
                     3.0,
                     Pos.BOTTOM_RIGHT,
                     NotificationType.ERROR
                 );
-            }
-            else if (cause instanceof DatabaseException dbEx) {
-                showNotification(
+       showNotification(
                     "Datenbank-Fehler",
                     dbEx.getUserMessage(),
                     3.0,
                     Pos.BOTTOM_RIGHT,
                     NotificationType.ERROR
                 );
-            }
-            else {
-                showNotification(
+       showNotification(
                     "Ansichtsfehler",
                     "Die Ansicht „" + fxmlFile + "“ konnte nicht geladen werden.",
                     3.0,
                     Pos.BOTTOM_RIGHT,
                     NotificationType.ERROR
                 );
+     */
+    private void updateNavigationButtons(String fxmlFile) {
+        homeBtn.getStyleClass().remove("active-nav-button");
+        watchlistBtn.getStyleClass().remove("active-nav-button");
+        aboutBtn.getStyleClass().remove("active-nav-button");
+
+
+        switch (fxmlFile) {
+            case "home-view.fxml" -> {
+                if (!homeBtn.getStyleClass().contains("active-nav-button")) {
+                    homeBtn.getStyleClass().add("active-nav-button");
+                }
+            }
+            case "watchlist-view.fxml" -> {
+                if (!watchlistBtn.getStyleClass().contains("active-nav-button")) {
+                    watchlistBtn.getStyleClass().add("active-nav-button");
+                }
+            }
+            case "about-view.fxml" -> {
+                if (!aboutBtn.getStyleClass().contains("active-nav-button")) {
+                    aboutBtn.getStyleClass().add("active-nav-button");
+                }
             }
         }
     }
 
-    private void updateNavigationButtons(String fxmlFile) {
-        homeBtn.getStyleClass().remove("active-nav-button");
-        watchlistBtn.getStyleClass().remove("active-nav-button");
-
-        if (fxmlFile.equals("home-view.fxml")) {
-            if (!homeBtn.getStyleClass().contains("active-nav-button")) {
-                homeBtn.getStyleClass().add("active-nav-button");
-            }
-        } else if (fxmlFile.equals("watchlist-view.fxml")) {
-            if (!watchlistBtn.getStyleClass().contains("active-nav-button")) {
-                watchlistBtn.getStyleClass().add("active-nav-button");
-            }
-        }
+    public enum NotificationType {
+        INFO, WARNING, ERROR, CONFIRM
     }
 
     /**
@@ -114,9 +136,7 @@ public class MainController {
      * @param position where on screen (e.g. BOTTOM_RIGHT)
      * @param type     style (INFO/WARNING/ERROR/CONFIRM)
      */
-    public enum NotificationType {
-        INFO, WARNING, ERROR, CONFIRM
-    }
+
     private void showNotification(String title,
                                   String message,
                                   double seconds,

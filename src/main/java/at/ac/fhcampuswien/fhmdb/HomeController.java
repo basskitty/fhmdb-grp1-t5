@@ -8,6 +8,7 @@ import at.ac.fhcampuswien.fhmdb.models.Decade;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.Sorting;
+import at.ac.fhcampuswien.fhmdb.models.sorting.SortContext;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
@@ -56,6 +57,7 @@ public class HomeController implements Initializable
     private WatchlistRepository watchlistRepository;
 
     MovieAPI movieAPI = new MovieAPI();
+    private SortContext sortContext = new SortContext();
     List<Movie> allMovies;
 
     @Override
@@ -167,7 +169,7 @@ public class HomeController implements Initializable
         });
 
         sortBtn.setText(Sorting.NAME_ASC.buttonText);
-        sortBtn.setOnAction(e -> sortMovies());
+        sortBtn.setOnAction(e -> onSortButtonClicked());
     }
 
 
@@ -282,6 +284,8 @@ public class HomeController implements Initializable
     /**
      * Toggles the sorting order of movies by title (case‑insensitive).
      */
+
+    /*
     void sortMovies()
     {
         Comparator<Movie> comparator = Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER);
@@ -294,6 +298,15 @@ public class HomeController implements Initializable
             FXCollections.sort(observableMovies, comparator.reversed());
             sortBtn.setText(Sorting.NAME_ASC.buttonText);
         }
+    }
+     */
+
+
+    @FXML
+    private void onSortButtonClicked() {
+        sortContext.nextState();
+        List<Movie> sorted = sortContext.applySort(observableMovies);
+        observableMovies.setAll(sorted);
     }
 
     // Create placeholder if there are no movies matching with the chosen filters
@@ -322,9 +335,11 @@ public class HomeController implements Initializable
         });
     }
 
+    //------------------ NOTIFICATIONS ----------------------
+    public enum NotificationType {
+        INFO, WARNING, ERROR, CONFIRM
+    }
 
-
-     
     /**
      * Displays a toast‐style notification in the corner.
      *
@@ -334,9 +349,7 @@ public class HomeController implements Initializable
      * @param position where on screen (e.g. BOTTOM_RIGHT)
      * @param type     style (INFO/WARNING/ERROR/CONFIRM)
      */
-    public enum NotificationType {
-        INFO, WARNING, ERROR, CONFIRM
-    }
+
     private void showNotification(String title,
                                   String message,
                                   double seconds,

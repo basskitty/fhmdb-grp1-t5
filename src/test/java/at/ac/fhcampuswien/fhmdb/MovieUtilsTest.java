@@ -86,10 +86,12 @@ public class MovieUtilsTest {
         List<Movie> movies = List.of(movie1, movie2, movie3, movie4, movie5, movie6, movie7);
 
         // When
-        long movieCount = MovieUtils.countMoviesFrom(movies, "Francis Ford Coppola");
+        long movieCountCoppola = MovieUtils.countMoviesFrom(movies, "Francis Ford Coppola");
+        long movieCountVarda = MovieUtils.countMoviesFrom(movies, "Agnès Varda");
 
         // Then
-        assertEquals(1, movieCount);
+        assertEquals(1, movieCountCoppola);
+        assertEquals(3, movieCountVarda);
     }
 
     @Test
