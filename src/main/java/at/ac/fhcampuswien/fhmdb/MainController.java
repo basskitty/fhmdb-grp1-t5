@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 import javafx.scene.control.Button;
+import at.ac.fhcampuswien.fhmdb.ui.ControllerFactory;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -33,6 +34,10 @@ public class MainController {
     @FXML
     private HBox navigationBox;
 
+    public MainController() {
+        System.out.println("Init MainController");
+    }
+
     public void initialize() {
         // Connect buttons
         homeBtn.setOnAction(e -> loadView("home-view.fxml"));
@@ -57,9 +62,10 @@ public class MainController {
     
     private void loadView(String fxmlFile) {
         try {
-            Pane view = FXMLLoader.load(
-                    Objects.requireNonNull(getClass().getResource(fxmlFile))
-            );
+            FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource(fxmlFile)));
+            loader.setControllerFactory(ControllerFactory.getInstance()); // Factory einsetzen
+            Pane view = loader.load();
+
             contentPane.getChildren().setAll(view);
             updateNavigationButtons(fxmlFile);
         }
