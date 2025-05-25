@@ -9,12 +9,23 @@ import java.util.List;
 
 
 public class MovieRepository {
-    Dao<MovieEntity, Long> dao;
+    // singleton instance
+    private static MovieRepository instance = null;
 
-    public MovieRepository() throws DatabaseException{
+    // constructor is private to prevent creating new instances
+    private MovieRepository() throws DatabaseException{
         this.dao = DatabaseManager.getInstance().getMovieDao();
     }
 
+    // singleton control method
+    public static MovieRepository getInstance() throws DatabaseException {
+        if (instance == null) {
+            instance = new MovieRepository();
+        }
+        return instance;
+    }
+
+    Dao<MovieEntity, Long> dao;
 
     /**
      * Retrieves all movies from the database.

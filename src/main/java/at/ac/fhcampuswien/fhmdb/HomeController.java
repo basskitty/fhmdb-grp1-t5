@@ -28,7 +28,6 @@ import org.controlsfx.control.CheckComboBox;
 import org.controlsfx.control.Notifications;
 
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.*;
 
 
@@ -115,7 +114,7 @@ public class HomeController implements Initializable
         // Load all Movies & Set List View to observable List   
          // Prepare watchlist repository
          try {
-            watchlistRepository = new WatchlistRepository();
+            watchlistRepository = WatchlistRepository.getInstance();
         } catch (DatabaseException dbEx) {
             showNotification("Datenbank-Fehler", dbEx.getUserMessage(),
                              3.0, Pos.BOTTOM_RIGHT, NotificationType.ERROR);
@@ -224,14 +223,14 @@ public class HomeController implements Initializable
 
     private void saveMoviesToDatabase(List<Movie> movies) throws DatabaseException
     {
-        MovieRepository movieRepository = new MovieRepository();
+        MovieRepository movieRepository = MovieRepository.getInstance();
         movieRepository.removeAll();
         movieRepository.addAllMovies(movies);
     }
 
     private List<Movie> getMoviesFromDatabase() throws DatabaseException  
     {
-        MovieRepository movieRepository = new MovieRepository();
+        MovieRepository movieRepository = MovieRepository.getInstance();
         return MovieEntity.toMovies(movieRepository.getAllMovies());
     }
 

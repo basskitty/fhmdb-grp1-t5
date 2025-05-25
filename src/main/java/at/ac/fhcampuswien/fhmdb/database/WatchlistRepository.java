@@ -7,14 +7,25 @@ import com.j256.ormlite.dao.Dao;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class WatchlistRepository {
-    private final Dao<WatchlistMovieEntity, Long> dao;
- 
-    public WatchlistRepository() throws DatabaseException{
+    // singleton instance
+    private static WatchlistRepository instance = null;
+
+    // constructor is private to prevent creating new instances
+    private WatchlistRepository() throws DatabaseException{
         this.dao = DatabaseManager.getInstance().getWatchlistDao();
     }
+
+    // singleton control method
+    public static WatchlistRepository getInstance() throws DatabaseException {
+        if (instance == null) {
+            instance = new WatchlistRepository();
+        }
+        return instance;
+    }
+
+    private final Dao<WatchlistMovieEntity, Long> dao;
 
     public List<WatchlistMovieEntity> getWatchlist() throws DatabaseException{
         try {
@@ -71,7 +82,7 @@ public class WatchlistRepository {
     public List<Movie> getMoviesFromWatchlist() throws DatabaseException{
         try {
             List<WatchlistMovieEntity> entities = dao.queryForAll();
-            MovieRepository movieRepository = new MovieRepository();
+            MovieRepository movieRepository = MovieRepository.getInstance();
 
             List<Movie> movies = new ArrayList<>();
             for (WatchlistMovieEntity entity : entities) {
