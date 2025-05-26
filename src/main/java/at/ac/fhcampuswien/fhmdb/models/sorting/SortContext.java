@@ -18,4 +18,8 @@ public class SortContext {
     public SortState getCurrentState() {
         return currentState;
     }
+
+    public String getButtonLabel() {
+        return currentState.getButtonLabel();
+    }
 }

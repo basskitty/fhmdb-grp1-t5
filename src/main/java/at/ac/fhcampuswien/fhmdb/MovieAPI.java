@@ -17,6 +17,7 @@ Movie movieFromID = MovieAPI.getMovieByID(UUID.fromString("a45e4b03-ece7-49e7-81
 
 package at.ac.fhcampuswien.fhmdb;
 
+import at.ac.fhcampuswien.fhmdb.exceptions.MovieApiException;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import com.google.gson.Gson;
@@ -72,12 +73,12 @@ public class MovieAPI {
     }
 
     // Method to get all movies without filtering
-    public static List<Movie> getAllMovies() {
-        return getfilteredMovies(null, null, null, null);
+    public static List<Movie> getAllMovies() throws MovieApiException {
+        return getFilteredMovies(null, null, null, null);
     }
 
     // Method to get filtered movies
-    public static List<Movie> getfilteredMovies(String query, Genre genre, String year, String rating)
+    public static List<Movie> getFilteredMovies(String query, Genre genre, String year, String rating) throws MovieApiException
     {
         Request request = new Request.Builder()
                 .header("User-Agent", "http.agent")

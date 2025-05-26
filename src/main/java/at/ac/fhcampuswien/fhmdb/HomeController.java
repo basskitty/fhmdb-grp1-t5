@@ -1,17 +1,18 @@
 package at.ac.fhcampuswien.fhmdb;
-
+import at.ac.fhcampuswien.fhmdb.database.MovieEntity;
+import at.ac.fhcampuswien.fhmdb.database.MovieRepository;
 import at.ac.fhcampuswien.fhmdb.database.WatchlistRepository;
 import at.ac.fhcampuswien.fhmdb.exceptions.DatabaseException;
+import at.ac.fhcampuswien.fhmdb.exceptions.MovieApiException;
 import at.ac.fhcampuswien.fhmdb.models.Decade;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.Sorting;
-import at.ac.fhcampuswien.fhmdb.observer.Observer;
+import at.ac.fhcampuswien.fhmdb.models.sorting.SortContext;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -30,7 +31,7 @@ import java.net.URL;
 import java.util.*;
 
 
-public class HomeController implements Initializable, Observer<Movie>
+public class HomeController implements Initializable
 {
 
     @FXML
@@ -52,20 +53,94 @@ public class HomeController implements Initializable, Observer<Movie>
     // This observable list backs the ListView.
     final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
-    // Public List<Movie> allMovies = Movie.initializeMovies();
-    public List<Movie> allMovies = MovieAPI.getAllMovies();
-
     private WatchlistRepository watchlistRepository;
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle)
-    {
-        // LOAD MOVIES
-        // Load all Movies & Set List View to observable List
-        observableMovies.addAll(allMovies);
+    MovieAPI movieAPI = new MovieAPI();
+    private SortContext sortContext = new SortContext();
+    List<Movie> allMovies;
 
+    public HomeController() {
+        System.out.println("Init HomeController");
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        initializeData();
+        initializeUi();
+    }
+
+    public void initializeData () {
+
+        try 
+        {
+            allMovies = movieAPI.getAllMovies();
+            saveMoviesToDatabase(allMovies);
+        } 
+        catch (MovieApiException e) 
+        {
+             // API failed → inform user, then fallback to DB
+             showNotification(
+                "API-Fehler",
+                e.getUserMessage(),
+                3.0,
+                Pos.BOTTOM_RIGHT,
+                NotificationType.ERROR
+            );
+            try {
+                allMovies = getMoviesFromDatabase();
+            } catch (DatabaseException dbEx) {
+                // DB also failed → inform user and leave list empty
+                showNotification(
+                    "Datenbank-Fehler",
+                    dbEx.getUserMessage(),
+                    3.0,
+                    Pos.BOTTOM_RIGHT,
+                    NotificationType.ERROR
+                );
+                allMovies = Collections.emptyList();
+            }
+        }
+        catch(DatabaseException e)
+        {
+            // Saving to DB failed on first run → inform user, but still proceed with API data
+            showNotification(
+                "Datenbank-Fehler",
+                e.getUserMessage(),
+                3.0,
+                Pos.BOTTOM_RIGHT,
+                NotificationType.WARNING
+            );
+        }
+    }
+
+    public void initializeUi () {
+        // LOAD MOVIES
+        // Load all Movies & Set List View to observable List   
+         // Prepare watchlist repository
+         try {
+            watchlistRepository = WatchlistRepository.getInstance();
+        } catch (DatabaseException dbEx) {
+            showNotification("Datenbank-Fehler", dbEx.getUserMessage(),
+                             3.0, Pos.BOTTOM_RIGHT, NotificationType.ERROR);
+            // disable watchlist adds:
+            watchlistRepository = null;
+        }
+        
+        
+        observableMovies.addAll(allMovies);
         movieListView.setItems(observableMovies);
-        movieListView.setCellFactory(listView -> new MovieCell(this::onDetailsClicked, "Show Details"));
+        movieListView.setCellFactory(listView -> new MovieCell(movie -> {
+            if (watchlistRepository != null) {
+                try {
+                    watchlistRepository.addMovie(movie);
+                    showNotification("Watchlist", "„" + movie.getTitle() + "“ hinzugefügt.",
+                                     2.5, Pos.BOTTOM_RIGHT, NotificationType.CONFIRM);
+                } catch (DatabaseException e) {
+                    showNotification("Datenbank-Fehler", e.getUserMessage(),
+                                     3.0, Pos.BOTTOM_RIGHT, NotificationType.ERROR);
+                }
+            }
+        }, "Add to Watchlist"));
 
         // LOAD GENRES
         // Populate the ComboBox with all Genre enum values.
@@ -82,62 +157,30 @@ public class HomeController implements Initializable, Observer<Movie>
         ratingComboBox.setPromptText("Select minimum rating");
 
         // SET EVENT LISTENERS
-        searchBtn.setOnAction(e -> filterMovies());
-
-        sortBtn.setText(Sorting.NAME_ASC.buttonText);
-        sortBtn.setOnAction(e -> sortMovies());
-
-        // initialize watchlistRepo & register observer
-        try {
-            watchlistRepository = WatchlistRepository.getInstance();
-            watchlistRepository.addObserver(this);
-        } catch (DatabaseException e) {
-            showNotification(
-                    "Datenbank-Fehler",
-                    e.getUserMessage(),
+        searchBtn.setOnAction(e -> {
+            try {
+                filterMovies();
+            } catch (MovieApiException apiEx) {
+                showNotification(
+                    "API-Fehler",
+                    apiEx.getUserMessage(),
                     3.0,
                     Pos.BOTTOM_RIGHT,
                     NotificationType.ERROR
-            );
-        }
-
-        // now cell factory for “Add” button
-        movieListView.setCellFactory(listView ->
-                new MovieCell(movie -> {
-                    try {
-                        watchlistRepository.addMovie(movie);
-                    } catch (DatabaseException dbEx) {
-                        showNotification(
-                                "Datenbank-Fehler",
-                                dbEx.getUserMessage(),
-                                3.0,
-                                Pos.BOTTOM_RIGHT,
-                                NotificationType.ERROR
-                        );
-                    }
-                }, "Add")
-        );
-    }
-
-    @Override
-    public void update(Movie movie, boolean success, String message) {
-        Platform.runLater(() -> {
-            showNotification(
-                    "Watchlist",
-                    message,
-                    2.5,
-                    Pos.BOTTOM_RIGHT,
-                    success ? NotificationType.CONFIRM : NotificationType.WARNING
-            );
+                );
+            }
         });
-    }
 
+        sortBtn.setText(sortContext.getButtonLabel());
+        sortBtn.setOnAction(e -> onSortButtonClicked());
+    }
 
     private void onDetailsClicked(Movie movie) {
         // TODO: Implement Detail Overview
     }
 
-    void filterMovies()
+
+    void filterMovies() throws MovieApiException
     {
         // Retrieve selected filters from user inputs
         String searchText = getSearchText();
@@ -145,12 +188,12 @@ public class HomeController implements Initializable, Observer<Movie>
         String minRating = getSelectedRating();
         Genre selectedGenre = getSelectedGenre();
 
-        List<Movie> searchedMovies = getMoviesfromAPI(searchText, selectedGenre, selectedDecades, minRating);
+        List<Movie> searchedMovies = getMoviesFromAPI(searchText, selectedGenre, selectedDecades, minRating);
 
         // Fallback: If search text doesn't match with any title,
         // filter descriptions locally
         if (searchText != null && searchedMovies.isEmpty()) {
-            List<Movie> moviesWithoutQueryFilter = getMoviesfromAPI(null, selectedGenre, selectedDecades, minRating);
+            List<Movie> moviesWithoutQueryFilter = getMoviesFromAPI(null, selectedGenre, selectedDecades, minRating);
             searchedMovies = filterDescriptionLocally(searchText, moviesWithoutQueryFilter);
         }
 
@@ -167,23 +210,36 @@ public class HomeController implements Initializable, Observer<Movie>
     }
 
 
-    List<Movie> getMoviesfromAPI(String query, Genre genre, List<Decade> selectedDecades, String rating)
+    List<Movie> getMoviesFromAPI(String query, Genre genre, List<Decade> selectedDecades, String rating) throws MovieApiException
     {
         List<String> selectedYears = getSelectedYears(selectedDecades);
 
         // If no decades selected → only 1 API call with null for releaseYear
         if (selectedYears.isEmpty()) {
-            return MovieAPI.getfilteredMovies(query, genre, null, rating);
+            return movieAPI.getFilteredMovies(query, genre, null, rating);
         }
 
         List<Movie> filteredMovies = new ArrayList<>();
 
         for (String year : selectedYears) {
-            List<Movie> response = MovieAPI.getfilteredMovies(query, genre, year, rating);
+            List<Movie> response = movieAPI.getFilteredMovies(query, genre, year, rating);
             filteredMovies.addAll(response);
         }
 
         return filteredMovies;
+    }
+
+    private void saveMoviesToDatabase(List<Movie> movies) throws DatabaseException
+    {
+        MovieRepository movieRepository = MovieRepository.getInstance();
+        movieRepository.removeAll();
+        movieRepository.addAllMovies(movies);
+    }
+
+    private List<Movie> getMoviesFromDatabase() throws DatabaseException  
+    {
+        MovieRepository movieRepository = MovieRepository.getInstance();
+        return MovieEntity.toMovies(movieRepository.getAllMovies());
     }
 
     // GETTER methods for user input
@@ -235,6 +291,8 @@ public class HomeController implements Initializable, Observer<Movie>
     /**
      * Toggles the sorting order of movies by title (case‑insensitive).
      */
+
+    /*
     void sortMovies()
     {
         Comparator<Movie> comparator = Comparator.comparing(Movie::getTitle, String.CASE_INSENSITIVE_ORDER);
@@ -247,6 +305,16 @@ public class HomeController implements Initializable, Observer<Movie>
             FXCollections.sort(observableMovies, comparator.reversed());
             sortBtn.setText(Sorting.NAME_ASC.buttonText);
         }
+    }
+     */
+
+
+    @FXML
+    private void onSortButtonClicked() {
+        sortContext.nextState();
+        List<Movie> sorted = sortContext.applySort(observableMovies);
+        observableMovies.setAll(sorted);
+        sortBtn.setText(sortContext.getButtonLabel());
     }
 
     // Create placeholder if there are no movies matching with the chosen filters
@@ -275,7 +343,20 @@ public class HomeController implements Initializable, Observer<Movie>
         });
     }
 
-    public enum NotificationType { INFO, WARNING, ERROR, CONFIRM }
+    //------------------ NOTIFICATIONS ----------------------
+    public enum NotificationType {
+        INFO, WARNING, ERROR, CONFIRM
+    }
+
+    /**
+     * Displays a toast‐style notification in the corner.
+     *
+     * @param title    the bold heading on the popup
+     * @param message  the body text
+     * @param seconds  how many seconds to stay visible
+     * @param position where on screen (e.g. BOTTOM_RIGHT)
+     * @param type     style (INFO/WARNING/ERROR/CONFIRM)
+     */
 
     private void showNotification(String title,
                                   String message,
@@ -283,15 +364,17 @@ public class HomeController implements Initializable, Observer<Movie>
                                   Pos position,
                                   NotificationType type) {
         Notifications notif = Notifications.create()
-                .title(title)
-                .text(message)
-                .hideAfter(Duration.seconds(seconds))
-                .position(position);
+                                 .title(title)
+                                 .text(message)
+                                 .hideAfter(Duration.seconds(seconds))
+                                 .position(position);
+
         switch (type) {
-            case ERROR   -> notif.showError();
-            case WARNING -> notif.showWarning();
-            case CONFIRM -> notif.showConfirm();
-            default      -> notif.showInformation();
+            case ERROR    -> notif.showError();
+            case WARNING  -> notif.showWarning();
+            case CONFIRM  -> notif.showConfirm();
+            default       -> notif.showInformation();
         }
     }
+
 }
