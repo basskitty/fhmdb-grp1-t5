@@ -12,4 +12,9 @@ public class NotSortedState implements SortState {
     public SortState nextState() {
         return new SortedAscState();
     }
+
+    @Override
+    public String getButtonLabel() {
+        return "Sort - Name (asc)";
+    }
 }

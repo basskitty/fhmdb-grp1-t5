@@ -171,7 +171,7 @@ public class HomeController implements Initializable
             }
         });
 
-        sortBtn.setText(Sorting.NAME_ASC.buttonText);
+        sortBtn.setText(sortContext.getCurrentState().getButtonLabel());
         sortBtn.setOnAction(e -> onSortButtonClicked());
     }
 
@@ -310,6 +310,7 @@ public class HomeController implements Initializable
         sortContext.nextState();
         List<Movie> sorted = sortContext.applySort(observableMovies);
         observableMovies.setAll(sorted);
+        sortBtn.setText(sortContext.getCurrentState().getButtonLabel());
     }
 
     // Create placeholder if there are no movies matching with the chosen filters

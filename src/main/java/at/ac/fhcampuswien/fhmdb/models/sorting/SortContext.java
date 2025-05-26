@@ -14,4 +14,8 @@ public class SortContext {
     public List<Movie> applySort(List<Movie> movies) {
         return currentState.sort(movies);
     }
+
+    public SortState getCurrentState() {
+        return currentState;
+    }
 }

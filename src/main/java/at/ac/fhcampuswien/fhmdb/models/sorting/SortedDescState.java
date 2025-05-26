@@ -19,4 +19,9 @@ public class SortedDescState implements SortState {
         System.out.println("Movies sorted in ascending order: A-Z");
         return new SortedAscState();
     }
+
+    @Override
+    public String getButtonLabel() {
+        return "Sort - Name (asc)";
+    }
 }
