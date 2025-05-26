@@ -4,6 +4,7 @@ import at.ac.fhcampuswien.fhmdb.database.WatchlistRepository;
 import at.ac.fhcampuswien.fhmdb.exceptions.DatabaseException;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
+import at.ac.fhcampuswien.fhmdb.observer.Observer;
 import com.jfoenix.controls.JFXListView;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -12,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.application.Platform;
 import javafx.util.Duration;
 
 import java.net.URL;
@@ -20,7 +22,7 @@ import java.util.ResourceBundle;
 
 import org.controlsfx.control.Notifications;
 
-public class WatchlistController implements Initializable {
+public class WatchlistController implements Initializable, Observer<Movie> {
     @FXML
     private JFXListView<Movie> watchlistView;
 
@@ -31,6 +33,7 @@ public class WatchlistController implements Initializable {
          // Initialize repository
         try {
             watchlistRepository = WatchlistRepository.getInstance();
+            watchlistRepository.addObserver(this);
         } catch (DatabaseException dbEx) {
             showNotification(
                 "Datenbank-Fehler",
@@ -49,17 +52,12 @@ public class WatchlistController implements Initializable {
 
         watchlistView.setCellFactory(listView -> new MovieCell(movie -> {
             if (watchlistRepository != null) {
-                try {
+                try
+                {
                     watchlistRepository.removeMovie(movie);
-                    updateWatchlistView();
-                    showNotification(
-                        "Watchlist",
-                        "\"" + movie.getTitle() + "\" entfernt.",
-                        2.5,
-                        Pos.BOTTOM_RIGHT,
-                        NotificationType.CONFIRM
-                    );
-                } catch (DatabaseException e) {
+                }
+                catch (DatabaseException e)
+                {
                     showNotification(
                         "Datenbank-Fehler",
                         e.getUserMessage(),
@@ -98,6 +96,21 @@ public class WatchlistController implements Initializable {
             watchlistView.getItems().clear();
             watchlistView.setPlaceholder(createWatchlistPlaceholder("Fehler beim Laden der Watchlist."));
         }
+    }
+
+    @Override
+    public void update(Movie movie, boolean success, String message)
+    {
+        Platform.runLater(() -> {
+            updateWatchlistView();
+            showNotification(
+                    "Watchlist",
+                    message,
+                    2.5,
+                    Pos.BOTTOM_RIGHT,
+                    success ? NotificationType.CONFIRM : NotificationType.WARNING
+            );
+        });
     }
 
     // Create placeholder if the watchlist is empty

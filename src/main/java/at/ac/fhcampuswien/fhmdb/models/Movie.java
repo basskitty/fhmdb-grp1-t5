@@ -95,7 +95,8 @@ public class Movie {
         return writers;
     }
 
-    public static List<Movie> initializeMovies(){
+    public static List<Movie> initializeMovies()
+    {
         List<Movie> movies = new ArrayList<>();
         movies.add(new Movie("Better Man", "Robbie Williams, starred by an ape.", Arrays.asList(Genre.DRAMA, Genre.BIOGRAPHY)));
         movies.add(new Movie("Harry Potter", "Avada Kedavra!", Arrays.asList(Genre.FANTASY, Genre.DRAMA)));
@@ -107,10 +108,14 @@ public class Movie {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         if (this == o) return true;
+
         if (!(o instanceof Movie)) return false;
+
         Movie movie = (Movie) o;
+
         return Objects.equals(getTitle(), movie.getTitle()) &&
                 Objects.equals(getDescription(), movie.getDescription()) &&
                 Objects.equals(getGenres(), movie.getGenres());
