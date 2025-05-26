@@ -59,6 +59,10 @@ public class HomeController implements Initializable
     private SortContext sortContext = new SortContext();
     List<Movie> allMovies;
 
+    public HomeController() {
+        System.out.println("Init HomeController");
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initializeData();
