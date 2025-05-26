@@ -7,6 +7,7 @@ import at.ac.fhcampuswien.fhmdb.models.Decade;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.Sorting;
+import at.ac.fhcampuswien.fhmdb.models.sorting.SortContext;
 import at.ac.fhcampuswien.fhmdb.observer.Observer;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
@@ -50,6 +51,8 @@ public class HomeController implements Initializable, Observer<Movie>
     public JFXComboBox<Integer> ratingComboBox;
 
 
+    SortContext sortContext = new SortContext();
+
     // This observable list backs the ListView.
     final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
 
@@ -58,6 +61,10 @@ public class HomeController implements Initializable, Observer<Movie>
 
     private WatchlistRepository watchlistRepository;
 
+    public HomeController()
+    {
+        System.out.println("Init Homecontroller");
+    }
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle)
     {
@@ -140,6 +147,9 @@ public class HomeController implements Initializable, Observer<Movie>
                     }
                 }, "Add")
         );
+
+        sortBtn.setText(sortContext.getButtonLabel());
+        sortBtn.setOnAction(e -> onSortButtonClicked());
     }
 
     @Override
@@ -155,6 +165,13 @@ public class HomeController implements Initializable, Observer<Movie>
         });
     }
 
+    @FXML
+    private void onSortButtonClicked() {
+        sortContext.nextState();
+        List<Movie> sorted = sortContext.applySort(observableMovies);
+        observableMovies.setAll(sorted);
+        sortBtn.setText(sortContext.getButtonLabel());
+    }
 
     private void onDetailsClicked(Movie movie) {
         // TODO: Implement Detail Overview
