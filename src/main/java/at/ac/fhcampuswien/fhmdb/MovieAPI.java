@@ -21,50 +21,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class MovieAPI {
-    public static final String API_BASE_PATH = "https://prog2.fh-campuswien.ac.at/movies";
     public static final OkHttpClient client = new OkHttpClient();
-    public static final String URL_DELIMITER = "&";
 
     public MovieAPI() 
     {
-    }
-
-    private String buildURL(UUID id) 
-    {
-        StringBuilder url = new StringBuilder(API_BASE_PATH);
-        
-        if (id != null) 
-        {
-            url.append("/").append(id);
-        }
-
-        return url.toString();
-    }
-
-    private String buildURL(String query, Genre genre, String year, String rating)
-    {
-        StringBuilder url = new StringBuilder(API_BASE_PATH);
-
-        // Check if any parameters are added and build URL
-        if ((query != null && !query.isEmpty()) || genre != null || year != null || rating != null) {
-            url.append("?");
-
-            if (query != null && !query.isEmpty()) {
-                url.append("query=").append(query).append(URL_DELIMITER);
-            }
-            if (genre != null) {
-                url.append("genre=").append(genre.getInternalName()).append(URL_DELIMITER);
-            }
-            if (year != null) {
-                url.append("releaseYear=").append(year).append(URL_DELIMITER);
-            }
-            if (rating != null) {
-                url.append("ratingFrom=").append(rating).append(URL_DELIMITER);
-            }
-        }
-
-        System.out.println("Query URL: " + url);
-        return url.toString();
     }
 
     /**
@@ -78,11 +38,17 @@ public class MovieAPI {
      * Get filtered movies<br/>
      * e.g. movies with "the" in title: MovieAPI.getAllMovies("the", null, null, null);
       */
-    public List<Movie> getFilteredMovies(String query, Genre genre, String year, String rating) throws MovieApiException
-    {
+    public List<Movie> getFilteredMovies(String query, Genre genre, String year, String rating) throws MovieApiException {
+        String requestURL = MovieAPIRequestBuilder.newBuilder()
+                .query(query)
+                .genre(genre)
+                .year(year)
+                .rating(rating)
+                .build();
+
         Request request = new Request.Builder()
                 .header("User-Agent", "http.agent")
-                .url(buildURL(query, genre, year, rating))
+                .url(requestURL)
                 .build();
 
         return parseMovies(request);
@@ -142,9 +108,13 @@ public class MovieAPI {
      * @return Movie object
      */
     public Movie getMovieByID(UUID id) throws MovieApiException {
+        String requestURL = MovieAPIRequestBuilder.newBuilder()
+                .id(id)
+                .build();
+
         Request request = new Request.Builder()
                 .header("User-Agent", "http.agent")
-                .url(buildURL(Objects.requireNonNull(id)))
+                .url(requestURL)
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
