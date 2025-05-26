@@ -35,7 +35,9 @@ public class WatchlistRepository  implements Observable<Movie> {
     // Observable<Movie> methods
     @Override
     public void addObserver(Observer<Movie> observer) {
-        observers.add(observer);
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
     }
 
     @Override

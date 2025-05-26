@@ -126,15 +126,7 @@ public class WatchlistController implements Initializable, Observer<Movie> {
     }
 
 
-    /**
-     * Displays a toast‐style notification in the corner.
-     *
-     * @param title    the bold heading on the popup
-     * @param message  the body text
-     * @param seconds  how many seconds to stay visible
-     * @param position where on screen (e.g. BOTTOM_RIGHT)
-     * @param type     style (INFO/WARNING/ERROR/CONFIRM)
-     */
+
     public enum NotificationType {
         INFO, WARNING, ERROR, CONFIRM
     }
